@@ -1,0 +1,40 @@
+# PURSUE OS — Decision Record
+
+> **Source:** PURSUE OS master handoff (authoritative) for Part A; implementation sessions for Part B.
+> **Category:** A (Part A — locked product decisions) / B (Part B — implementation decisions).
+
+## Part A — Locked Product Decisions (from master handoff)
+
+| # | Decision | Source (handoff section) | Date |
+|---|---|---|---|
+| A1 | License: Apache License 2.0 for PURSUE's own code; third-party software may carry separate licenses | LOCKED LICENSE DECISION | Planning (locked) |
+| A2 | Name/identity: PURSUE OS, brand P4inz, creator P4inz / Atharva Patil | LOCKED PRODUCT IDENTITY | Planning (locked) |
+| A3 | Core purpose: one operating system for the investigation workflow; not a Kali clone / cyberpunk OS / generic distro / tool dump | LOCKED PRODUCT IDENTITY | Planning (locked) |
+| A4 | Flagship interfaces: Investigation Terminal and Investigation Browser | FLAGSHIP FEATURES | Planning (locked) |
+| A5 | Tor is deeply integrated, configurable, user-controlled; never claim complete anonymity | TOR | Planning (locked) |
+| A6 | Browser: Tor-based for appropriate workflows; Brave/normal workflow otherwise; multiple search engines (DuckDuckGo, Brave Search, onion search; Ahmia and Yahoo options); Tor not forced for every request | BROWSER | Planning (locked) |
+| A7 | Terminal is flagship; dedicated phase; tor-in-detail and terminal phases handled together | TERMINAL / TOR | Planning (locked) |
+| A8 | Evidence is always the source of truth; integrity and provenance foundational; AI never alters evidence | CASE + EVIDENCE | Planning (locked) |
+| A9 | Reporting: professional, ZIP/JSON export, provenance/integrity preserved, not overengineered | REPORTING | Planning (locked) |
+| A10 | AI: optional; local models only; no external AI APIs in V1; three model categories (fast, deep-thinking, coding/technical); assistant only; non-AI mode exists | AI | Planning (locked) |
+| A11 | Plugin system: strong V1 foundation (~5–7 tools/use case); V2 stronger system, official modules, downloadable advanced modules, public plugins | PLUGIN SYSTEM | Planning (locked) |
+| A12 | Security: S-class strong defaults; optional VPN/VM/isolation; no invulnerability claims; security architecture areas listed | SECURITY | Planning (locked) |
+| A13 | Customization: highly customizable; simple default UX; advanced settings for experienced users | CUSTOMIZATION | Planning (locked) |
+| A14 | Tool strategy: curated defaults (~5–7 per use case); integrate existing tools; avoid reinventing mature tools | INVESTIGATION TOOL STRATEGY | Planning (locked) |
+| A15 | Repository is public; README status stays honest (no fake claims) | PUBLIC REPOSITORY STATUS | Planning (locked) |
+| A16 | Directory architecture is complete (handoff tree); empty dirs are intentional; no placeholder files just to track folders | REPOSITORY STRUCTURE | Planning (locked) |
+| A17 | Document ownership model: Category A (authoritative, not casually rewritten) vs Category B (implementation docs, agent-writable) | DOCUMENT OWNERSHIP MODEL | Planning (locked) |
+| A18 | Decision workflow: agent decides technical questions autonomously; asks only owner-level questions | DECISION WORKFLOW | Planning (locked) |
+
+## Part B — Implementation Decisions (technical; made autonomously per A18)
+
+| # | Decision | Reason | Alternatives considered | Security implications | Future implications |
+|---|---|---|---|---|---|
+| B1 | Rust workspace (Cargo) as the foundation for core/evidence components; Python reserved for investigation-ecosystem tooling | Memory safety at privilege boundaries; single static binaries; offline-native; strong test tooling; toolchain already available on dev machine (rustc 1.97.1) | Go, C, C++ | Rust memory safety reduces whole classes of memory-corruption vulnerabilities; `#![deny(unsafe_code)]` in foundation crates keeps the boundary explicit | Core services, IPC, terminal/browser foundations build on this workspace |
+| B2 | Foundation crates: `pursue-core` (shared primitives) and `pursue-evidence` (content addressing, provenance, audit log, stores) | Smallest structure that establishes a real module boundary without overengineering | Single monolith crate; full service stack now | Only pure, well-tested primitives in the foundation; no privileged code yet | Future crates (case, ipc, storage) slot into the same workspace |
+| B3 | Evidence integrity primitives: SHA-256 content addressing, immutable evidence records, append-only hash-chained audit log, verification on every read | Evidence is the immutable source of truth; tamper detection must be verifiable in tests | BLAKE3 (faster but SHA-256 is the interoperable baseline), Merkle-DAG (deferred) | Hash chaining makes tampering mathematically detectable; verification-on-read catches bit rot/corruption; does not prevent tampering by a privileged actor | Foundation for case/provenance models and E01/AFF4 integration later |
+| B4 | Storage: trait-based `EvidenceStore` with in-memory and file-backed implementations | Keep persistence simple and testable now; no premature DB layer | SQLite now (deferred to case/data phase) | File store re-verifies content hashes on read; audit log integrity verified on load | Case DB (SQLite) and content-addressed blob store integrate behind the same traits |
+| B5 | Dependencies kept minimal: sha2, serde, serde_json (cross-platform, Apache-2.0/MIT dual-licensed) | Lean, auditable dependency surface; all are standard, offline-buildable | thiserror, tokio, clap (deferred) | Fewer dependencies = smaller review surface; no network or privileged operations in the foundation | Locked by Cargo.lock for reproducibility |
+| B6 | CI: GitHub Actions matrix (ubuntu-latest + windows-latest) running fmt, clippy -D warnings, cargo test, release build — implemented in `.github/workflows/ci.yml` | Validates the foundation where the developer and the future build host both work; minimal pipeline | Single-OS CI; full image-build pipeline | CI enforces lint/test gates before merge; no secrets in workflow | Image build (mkosi) job added when ISO foundation begins |
+| B7 | ISO/image foundation (mkosi/systemd) **deferred** | Cannot be validated on the current Windows dev host; rule: never claim implementation without validation | Creating unvalidated mkosi config now | Avoids shipping unvalidated build/security config | Phase 1B (minimal bootable base) starts the image foundation on a Linux host |
+| B8 | Git identity: name "Atharva Patil" and email `atharva.patil.cg@gmail.com` (owner-provided) set in local Git config | Owner instruction: report rather than guess; owner then supplied the real email | Changing automatically with a guessed email (rejected) | n/a | Real identity will attribute the first push to GitHub |
