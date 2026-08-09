@@ -337,7 +337,9 @@ pub mod unix_transport {
                     .unwrap()
                     .as_nanos()
             );
-            std::env::temp_dir().join(unique)
+            let dir = std::env::temp_dir().join(unique);
+            std::fs::create_dir_all(&dir).expect("create test temp dir");
+            dir
         }
 
         fn connect_with_retry(path: &std::path::Path) -> UnixTransport {
@@ -379,7 +381,9 @@ pub mod unix_transport {
             assert_eq!(response.id, 1);
             assert_eq!(response.result, Some(json!({"k": "v"})));
 
-            // The server must not be listening after a clean shutdown.
+            // Close the connection (one exchange per connection), then request
+            // a clean shutdown; the server must exit.
+            drop(client);
             shutdown.store(true, Ordering::Relaxed);
             handle.join().unwrap();
             let _ = std::fs::remove_dir_all(&dir);
@@ -414,6 +418,8 @@ pub mod unix_transport {
             let error = response.error.as_ref().unwrap();
             assert_eq!(error.code(), IpcErrorCode::UnknownService);
 
+            // Close the connection, then request a clean shutdown.
+            drop(client);
             shutdown.store(true, Ordering::Relaxed);
             handle.join().unwrap();
             let _ = std::fs::remove_dir_all(&dir);
