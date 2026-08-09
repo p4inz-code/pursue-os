@@ -1,0 +1,18 @@
+[package]
+name = "pursue-evidence"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "PURSUE OS — evidence integrity foundation (content addressing, provenance, audit log)"
+
+[lints]
+workspace = true
+
+[dependencies]
+pursue-core = { path = "../pursue-core" }
+sha2 = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

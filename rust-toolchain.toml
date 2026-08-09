@@ -1,0 +1,4 @@
+# PURSUE OS — Rust toolchain (reproducibility)
+[toolchain]
+channel = "stable"
+components = ["clippy", "rustfmt"]
