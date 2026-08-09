@@ -296,7 +296,7 @@ pub mod unix_transport {
 
     #[cfg(test)]
     mod tests {
-        use super::{UnixTransport, serve_unix};
+        use super::{Transport, UnixTransport, serve_unix};
         use crate::ipc::dispatch::{Handler, Router};
         use crate::ipc::protocol::{IpcError, IpcErrorCode, MethodName, Request, ServiceId};
         use serde_json::{Value, json};
