@@ -2,86 +2,134 @@
 
 > **COMING SOON**
 
-> **Development Notice:** PURSUE OS is not currently ready for production use. The project is in its implementation phase and no stable release is available yet.
+> **Development Notice:** PURSUE OS is not ready for production use. The project is currently entering implementation and has no stable release or installation image.
 
-**PURSUE OS** is an investigation-focused Linux operating system built for OSINT, digital investigations, DFIR, secure research, and evidence-driven workflows.
+**PURSUE OS** is an investigation-focused Linux operating system designed for OSINT, digital investigations, DFIR, secure research, intelligence gathering, and evidence-driven workflows.
 
-Designed and developed by **P4inz**.
+Built by **P4inz**.
 
 ---
 
-## What is PURSUE?
+## The Idea
 
-PURSUE is being designed as a dedicated investigation workstation rather than a general-purpose Linux distribution.
+PURSUE is being built around a simple principle:
 
-Its core experience will bring together:
+> **One operating system for the investigation workflow.**
+
+Instead of assembling a large collection of unrelated tools, PURSUE aims to provide a coherent environment where investigators can research, collect, analyze, connect, preserve, and report information from one system.
+
+The project focuses heavily on two flagship interfaces:
+
+- **Investigation Terminal** — a purpose-built command-line environment for investigators.
+- **Investigation Browser** — secure, configurable browsing and research workflows with integrated Tor capabilities.
+
+These sit alongside the broader investigation platform, case system, evidence handling, and specialized tooling.
+
+---
+
+## Core Areas
+
+PURSUE is being designed to support:
 
 - OSINT and intelligence gathering
 - Secure investigation browsing
 - Integrated Tor workflows
-- A purpose-built investigation terminal
-- Case and evidence management
-- Evidence provenance and integrity
-- Investigation graphs and timelines
-- DFIR tooling and analysis
-- GEOINT and infrastructure intelligence
+- Investigation-focused terminal workflows
+- Case management
+- Evidence storage and provenance
+- Evidence integrity and traceability
+- Investigation graphs and relationships
+- Timelines and investigative organization
+- DFIR workflows
+- GEOINT
+- Infrastructure intelligence
+- CTI workflows
+- Media analysis
+- Reporting and export
+- Modular investigation tools
+- Plugin-based extensibility
 - Optional local AI assistance
-- Modular tools and plugins
-- Professional investigation reporting
 
-The goal is simple:
+The exact V1 implementation will be documented as development progresses.
 
-> **One operating system for the investigation workflow.**
+---
+
+## AI
+
+AI in PURSUE is designed as an **assistant, not an authority**.
+
+AI may help with tasks such as:
+
+- organizing information
+- summarizing investigator-selected material
+- explaining technical output
+- assisting with terminal workflows
+- helping navigate supported investigation tasks
+
+AI must not silently manipulate evidence or replace the investigator's judgment.
+
+**The source remains the source of truth.**
+
+AI functionality will be optional and configurable.
+
+---
+
+## Privacy & Security
+
+Privacy and security are foundational parts of PURSUE.
+
+The project is being designed around:
+
+- privacy-first investigation workflows
+- integrated Tor capabilities
+- configurable network security
+- evidence integrity
+- secure case handling
+- clear provenance
+- minimal unnecessary telemetry
+- user-controlled investigation environments
+
+PURSUE is intended to provide strong defaults without preventing experienced investigators from configuring their environment further.
 
 ---
 
 ## Development Status
 
-**PURSUE OS is currently under active development.**
+**Planning:** Complete  
+**Repository foundation:** Complete  
+**Architecture foundation:** Established  
+**Implementation:** Starting  
+**Stable release:** Not available
 
-The product planning and foundational architecture phase has been completed. The repository is now entering implementation.
+The public repository is intentionally minimal during this stage.
 
-The public repository is intentionally minimal during this stage while the core systems are being built and validated.
+Core implementation will be developed and validated before a public release is announced.
 
-There is currently no public release or installation image.
-
-Follow the repository for development progress and future releases.
-
-### Coming
-
-- Core OS foundation
-- Investigation platform
-- Flagship Terminal
-- Investigation Browser
-- Tor integration
-- Case & Evidence system
-- OSINT tooling
-- Local AI assistance
-- Plugin architecture
-
-More information will be published as development progresses.
+There is currently **no production-ready ISO**.
 
 ---
 
-## Philosophy
-
-PURSUE is built around four principles:
-
-**Privacy. Security. Investigation. Reliability.**
-
-Evidence remains the source of truth.
-
-AI assists investigators but does not replace investigator judgment or silently alter evidence.
-
----
-
-## License
+## Open Source
 
 PURSUE OS is released under the **Apache License 2.0**.
 
-Third-party components distributed with the operating system may be subject to their own licenses.
+Third-party software distributed with future PURSUE releases may use separate licenses.
 
-See [`LICENSE`](LICENSE) and [`NOTICE`](NOTICE) for details.
+See:
+
+- [`LICENSE`](LICENSE)
+- [`NOTICE`](NOTICE)
+- [`TRADEMARKS.md`](TRADEMARKS.md)
+
+---
+
+## Contributing
+
+PURSUE is currently in early implementation.
+
+Before contributing code, please read [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+Security vulnerabilities should **not** be reported through public issues. See [`SECURITY.md`](SECURITY.md).
 
 ---
 
@@ -93,15 +141,10 @@ PURSUE OS is an independent project created and maintained by P4inz.
 
 ---
 
-**PURSUE OS — Coming Soon.**
-
----
-
 ### Project Status
 
-**Planning:** Complete  
-**Architecture:** Foundation established  
-**Implementation:** Starting  
-**Public Release:** Not available yet
+**PURSUE OS — Coming Soon.**
 
-Follow [PURSUE OS](https://github.com/p4inz-code/pursue-os) for development updates.
+The foundation is ready.
+
+The build begins now.
