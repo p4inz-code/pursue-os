@@ -34,11 +34,14 @@ The handoff states some directories are intentionally empty and that no placehol
 ## Current Implementation Status (2026-08-09)
 
 - Top-level files and `docs/` are fully tracked (docs restored from the master handoff).
-- **Foundation additions (new):**
+- **Foundation additions:**
   - `Cargo.toml` — Rust workspace root.
   - `rust-toolchain.toml` — pinned stable toolchain.
   - `crates/pursue-core` — shared primitives.
   - `crates/pursue-evidence` — evidence integrity foundation (content addressing, audit log, stores).
   - `Cargo.lock` — locked dependency graph (reproducibility).
   - `.github/workflows/ci.yml` — CI pipeline (fmt, clippy, tests on ubuntu + windows).
+- **Phase 1C additions (core runtime):**
+  - `crates/pursue-runtime` — core runtime foundation: configuration (TOML), structured logging, service lifecycle, and the IPC/service boundary (see `docs/development/CORE_RUNTIME.md`).
+  - `docs/development/CORE_RUNTIME.md` — Phase 1C implementation guide.
 - The handoff's top-level directories (`os/`, `packaging/`, `plugins/`, `scripts/`, `src/`, `tests/`, `tools/`, `ui/`, `assets/`, `boot/`, `build/`, `config/`) are **created during their respective implementation phases** with real content; empty versions are not preserved in Git.

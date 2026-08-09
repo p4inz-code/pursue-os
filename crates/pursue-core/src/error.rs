@@ -18,6 +18,8 @@ pub enum Error {
     NotFound(String),
     /// An integrity check failed; data was altered or corrupted.
     IntegrityViolation(String),
+    /// A service lifecycle phase failed (see `pursue-runtime`).
+    ServiceFailure(String),
     /// An underlying I/O operation failed.
     Io(std::io::Error),
 }
@@ -30,6 +32,7 @@ impl fmt::Display for Error {
             Error::InvalidContentAddress(msg) => write!(f, "invalid content address: {msg}"),
             Error::NotFound(msg) => write!(f, "not found: {msg}"),
             Error::IntegrityViolation(msg) => write!(f, "integrity violation: {msg}"),
+            Error::ServiceFailure(msg) => write!(f, "service failure: {msg}"),
             Error::Io(err) => write!(f, "i/o error: {err}"),
         }
     }
@@ -61,6 +64,15 @@ mod tests {
     fn error_displays_human_readably() {
         let err = Error::IntegrityViolation("hash mismatch".into());
         assert_eq!(err.to_string(), "integrity violation: hash mismatch");
+    }
+
+    #[test]
+    fn service_failure_displays_human_readably() {
+        let err = Error::ServiceFailure("config failed during init: boom".into());
+        assert_eq!(
+            err.to_string(),
+            "service failure: config failed during init: boom"
+        );
     }
 
     #[test]
