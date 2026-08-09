@@ -1,0 +1,47 @@
+# PURSUE OS — CI
+#
+# Validates the foundation workspace on every push/PR:
+# formatting, static analysis (clippy, warnings denied), unit + integration
+# tests, and a release build.
+#
+# Kept deliberately small; image/build jobs will be added when the
+# ISO/image foundation phase begins (see docs/release/V1_RELEASE_PLAN.md).
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  foundation:
+    name: foundation (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Format check
+        run: cargo fmt --all --check
+
+      - name: Lint (clippy, warnings denied)
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: Unit + integration tests
+        run: cargo test --workspace
+
+      - name: Release build
+        run: cargo build --workspace --release
