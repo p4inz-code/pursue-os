@@ -1,0 +1,11 @@
+# Normalize line endings: repository always stores LF (matches .editorconfig).
+* text=auto
+
+*.md text eol=lf
+*.rs text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+.gitignore text eol=lf
+.gitattributes text eol=lf

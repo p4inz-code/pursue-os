@@ -1,0 +1,30 @@
+# Rust / Cargo build output
+/target/
+**/target/
+
+# Future OS build artifacts
+/build/
+*.deb
+*.iso
+*.img
+*.qcow2
+*.raw
+*.vmdk
+
+# Local tooling
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# Local scratch / logs
+/scratch/
+*.log
+
+# Secrets (never commit)
+*.pem
+*.key
+.env
+.env.*
