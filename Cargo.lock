@@ -106,6 +106,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "pursue-case"
+version = "0.1.0"
+dependencies = [
+ "pursue-core",
+ "pursue-evidence",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "pursue-core"
 version = "0.1.0"
 dependencies = [

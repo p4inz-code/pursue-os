@@ -1,0 +1,18 @@
+[package]
+name = "pursue-case"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "PURSUE OS — case foundation (validated case identifiers, case model, investigator-controlled metadata, audited operations)"
+
+[lints]
+workspace = true
+
+[dependencies]
+pursue-core = { path = "../pursue-core" }
+pursue-evidence = { path = "../pursue-evidence" }
+serde = { workspace = true }
+serde_json = { workspace = true }

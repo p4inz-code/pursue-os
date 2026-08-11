@@ -44,4 +44,7 @@ The handoff states some directories are intentionally empty and that no placehol
 - **Phase 1C additions (core runtime):**
   - `crates/pursue-runtime` — core runtime foundation: configuration (TOML), structured logging, service lifecycle, and the IPC/service boundary (see `docs/development/CORE_RUNTIME.md`).
   - `docs/development/CORE_RUNTIME.md` — Phase 1C implementation guide.
+- **Phase 1D additions (case core):**
+  - `crates/pursue-case` — case foundation: validated `CaseId`, the `Case` model, and audited case operations (see `docs/development/CASE_FOUNDATION.md`).
+  - `docs/development/CASE_FOUNDATION.md` — Phase 1D implementation boundary (case core implemented; case store layer pending).
 - The handoff's top-level directories (`os/`, `packaging/`, `plugins/`, `scripts/`, `src/`, `tests/`, `tools/`, `ui/`, `assets/`, `boot/`, `build/`, `config/`) are **created during their respective implementation phases** with real content; empty versions are not preserved in Git.

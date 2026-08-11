@@ -7,9 +7,14 @@
 
 ## Status
 
-- This is a **preparation artifact**: the Phase 1D implementation boundary.
-  No Phase 1D implementation has been started. The next full session
-  implements the case model against this contract.
+- **Case core implemented and validated (this session):** `crates/pursue-case`
+  provides the validated `CaseId`, the `Case` model with `CaseStatus`, and the
+  audited operations — attach/detach evidence by content address, metadata
+  updates, close/reopen. Fully unit-tested; the complete workspace validation
+  (fmt, clippy, tests, release build) is green.
+- **Pending (next session):** the case store layer — `CaseStore` trait,
+  in-memory and file-backed implementations, per-case isolation, persistence,
+  and tamper detection.
 - Phase 1D scope (locked by `docs/core/MASTER_SPEC.md` §15): case model,
   evidence model, provenance model, integrity model, secure storage,
   investigator-controlled metadata.
@@ -38,6 +43,19 @@ lists. Phase 1D does not rebuild them:
 model** — the container, its identifier, investigator-controlled metadata, the
 evidence relationship, and the case-level provenance/integrity wiring. All
 existing functionality is reused, never duplicated.
+
+## Implementation status (case core)
+
+| Contract item | Status |
+|---|---|
+| §1 Case identifier `CaseId` | **Implemented** (`crates/pursue-case/src/case_id.rs`) — validated on construction and deserialization |
+| §2 Case container | **Implemented** (`crates/pursue-case/src/case.rs`) |
+| §3 Investigator-controlled metadata | **Implemented** — typed, audited `set_title` / `set_notes` |
+| §4 Evidence ↔ case relationship | **Implemented** — `attach` / `detach` by `ContentAddress` |
+| §5 Provenance relationship | **Implemented** — per-case `AuditLog` with the locked action constants |
+| §6 Integrity relationship | Pending — enforced by the store layer (verification on open) |
+| §7 Case lifecycle | **Implemented** — `Open`/`Closed` with audited `close` / `reopen` |
+| Storage, isolation, tamper detection | Pending — next session |
 
 ## Locked contract (minimal)
 
@@ -85,9 +103,11 @@ timelines, findings, reports, and exports"). Minimal fields for Phase 1D:
 - The case references evidence **by content address**; evidence bytes are
   never copied into the case. The evidence store remains the source of truth.
 - `attach(address, actor)` / `detach(address, actor)` — explicit, audited
-  operations. Attach requires the address to exist in the case's evidence
-  store (no dangling references). Attach of an already-attached address is an
-  idempotent no-op (no duplicate audit event).
+  operations (implemented on the `Case` model). At the store layer, attach
+  will require the address to exist in the case's evidence store (no dangling
+  references). Attach of an already-attached address is an idempotent no-op
+  (no duplicate audit event). Detach of an address that is not attached fails
+  with `Error::NotFound` and leaves the case unchanged.
 - Blob verification stays in `pursue-evidence` (verification on every read);
   the case layer never re-verifies or stores blob bytes.
 
@@ -168,15 +188,19 @@ timelines, findings, reports, and exports"). Minimal fields for Phase 1D:
 - No IPC/service exposure of cases yet; that decision belongs to the phase
   that builds case services.
 
-## Starting point (next session)
+## Next session: the case store layer
 
-1. Add `crates/pursue-case` to the workspace `members` list.
-2. Implement `CaseId` with validation + unit tests.
-3. Implement `Case`, `CaseStatus`, and the audited operations + unit tests.
-4. Implement the `CaseStore` trait with `InMemoryCaseStore` and
-   `FileCaseStore` (per-case layout, verification on open) + tamper-detection
-   and isolation tests.
-5. Validate with the commands below; inspect `git diff`; commit.
+The case core is complete and validated. The next session implements:
+
+1. The `CaseStore` trait (create/load a case, run audited operations against
+   a stored case, read a case's audit log).
+2. `InMemoryCaseStore` and `FileCaseStore` with the per-case layout
+   (`<root>/cases/<case_id>/case.json` + `<root>/cases/<case_id>/evidence/`
+   as an existing `pursue-evidence` `FileStore`), case isolation, and
+   verification on open (audit chain + evidence-store open gates).
+3. Tamper-detection tests (manifest tampering breaks the chain) and
+   case-isolation tests, following `TESTING_STRATEGY.md`.
+4. Validate with the commands below; inspect `git diff`; commit.
 
 ## Validation
 
