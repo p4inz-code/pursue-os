@@ -7,14 +7,19 @@
 
 ## Status
 
-- **Case core implemented and validated (this session):** `crates/pursue-case`
-  provides the validated `CaseId`, the `Case` model with `CaseStatus`, and the
-  audited operations — attach/detach evidence by content address, metadata
-  updates, close/reopen. Fully unit-tested; the complete workspace validation
-  (fmt, clippy, tests, release build) is green.
-- **Pending (next session):** the case store layer — `CaseStore` trait,
-  in-memory and file-backed implementations, per-case isolation, persistence,
-  and tamper detection.
+**Phase 1D is complete and validated.** `crates/pursue-case` implements the
+full case/evidence foundation:
+
+- **Case core** — validated `CaseId`, the `Case` model with `CaseStatus`, and
+  the audited operations (attach/detach evidence by content address, metadata
+  updates, close/reopen).
+- **Store layer** — the `CaseStore` trait, `InMemoryCaseStore` (deterministic,
+  for tests), and `FileCaseStore` (the locked per-case layout, case isolation,
+  path-traversal guard, persistence, and verification on load with tamper
+  detection).
+
+All unit-tested; the complete workspace validation (fmt, clippy, tests,
+release build) is green.
 - Phase 1D scope (locked by `docs/core/MASTER_SPEC.md` §15): case model,
   evidence model, provenance model, integrity model, secure storage,
   investigator-controlled metadata.
@@ -44,18 +49,18 @@ model** — the container, its identifier, investigator-controlled metadata, the
 evidence relationship, and the case-level provenance/integrity wiring. All
 existing functionality is reused, never duplicated.
 
-## Implementation status (case core)
+## Implementation status
 
 | Contract item | Status |
 |---|---|
 | §1 Case identifier `CaseId` | **Implemented** (`crates/pursue-case/src/case_id.rs`) — validated on construction and deserialization |
 | §2 Case container | **Implemented** (`crates/pursue-case/src/case.rs`) |
 | §3 Investigator-controlled metadata | **Implemented** — typed, audited `set_title` / `set_notes` |
-| §4 Evidence ↔ case relationship | **Implemented** — `attach` / `detach` by `ContentAddress` |
+| §4 Evidence ↔ case relationship | **Implemented** — `attach` / `detach` by `ContentAddress`; `FileCaseStore` rejects dangling references on save and load |
 | §5 Provenance relationship | **Implemented** — per-case `AuditLog` with the locked action constants |
-| §6 Integrity relationship | Pending — enforced by the store layer (verification on open) |
+| §6 Integrity relationship | **Implemented** — manifest integrity hash + audit-chain verification + evidence-store verification on load (`DECISION_RECORD` B14) |
 | §7 Case lifecycle | **Implemented** — `Open`/`Closed` with audited `close` / `reopen` |
-| Storage, isolation, tamper detection | Pending — next session |
+| Storage, isolation, tamper detection | **Implemented** — `CaseStore`, `InMemoryCaseStore`, `FileCaseStore` |
 
 ## Locked contract (minimal)
 
@@ -103,11 +108,13 @@ timelines, findings, reports, and exports"). Minimal fields for Phase 1D:
 - The case references evidence **by content address**; evidence bytes are
   never copied into the case. The evidence store remains the source of truth.
 - `attach(address, actor)` / `detach(address, actor)` — explicit, audited
-  operations (implemented on the `Case` model). At the store layer, attach
-  will require the address to exist in the case's evidence store (no dangling
-  references). Attach of an already-attached address is an idempotent no-op
-  (no duplicate audit event). Detach of an address that is not attached fails
-  with `Error::NotFound` and leaves the case unchanged.
+  operations (implemented on the `Case` model). The store layer enforces that
+  no dangling references are persisted: `FileCaseStore::save_case` rejects a
+  case that references evidence absent from its evidence store, and
+  `load_case` fails closed if a referenced blob is missing or tampered.
+  Attach of an already-attached address is an idempotent no-op (no duplicate
+  audit event). Detach of an address that is not attached fails with
+  `Error::NotFound` and leaves the case unchanged.
 - Blob verification stays in `pursue-evidence` (verification on every read);
   the case layer never re-verifies or stores blob bytes.
 
@@ -125,15 +132,16 @@ timelines, findings, reports, and exports"). Minimal fields for Phase 1D:
 
 ### 6. Integrity relationship
 
-- A case is persisted as a version-gated manifest (version 1) containing
-  metadata, status, evidence membership, and the audit log — mirroring the
-  existing `FileStore` manifest pattern.
-- On open, the case store: (1) verifies the case audit chain, failing with
-  `Error::IntegrityViolation` on any alteration; (2) verifies every attached
-  address exists in the case's evidence store; (3) opens the case's evidence
-  store, which re-verifies blobs and its own audit chain.
-- Tampering with case metadata or membership therefore breaks the chain and
-  is detectable. Deterministic and fully offline.
+- A case is persisted as a version-gated manifest (version 1) — `case.json`
+  — containing the serialized case and `case_hash`, the SHA-256 content
+  address of the case's canonical serialization (implemented, `DECISION_RECORD` B14).
+- On load, the case store: (1) re-hashes the case and compares against
+  `case_hash`, failing with `Error::IntegrityViolation` on any alteration;
+  (2) verifies the audit chain; (3) opens the case's evidence store, which
+  re-verifies blobs and its own audit chain; (4) verifies every attached
+  address exists in that store.
+- Tampering with any case field — metadata, status, membership, or audit
+  history — is therefore detectable. Deterministic and fully offline.
 
 ### 7. Case lifecycle
 
@@ -144,15 +152,17 @@ timelines, findings, reports, and exports"). Minimal fields for Phase 1D:
 
 ## Storage and case isolation
 
-- New workspace crate: `crates/pursue-case` (per `DECISION_RECORD` B2, future
+- Workspace crate: `crates/pursue-case` (per `DECISION_RECORD` B2, future
   crates slot into the same workspace).
-- File layout (file-backed store): `<root>/cases/<case_id>/case.json` (case
-  manifest) and `<root>/cases/<case_id>/evidence/` (an existing
-  `pursue-evidence` `FileStore`).
+- File layout (file-backed store, implemented): `<root>/cases/<case_id>/case.json`
+  (case manifest) and `<root>/cases/<case_id>/evidence/` (an existing
+  `pursue-evidence` `FileStore`, reused unchanged).
 - **Case isolation** (`SECURITY_MODEL` / `SECURITY_BOUNDARIES` / `DATA_MODEL`):
   each case lives entirely under its own directory; the `CaseStore` API
   addresses one case at a time and exposes no cross-case access. Isolation is
-  structural (per-case layout) plus API-level.
+  structural (per-case layout) plus API-level; `CaseId` validation is
+  preserved and `FileCaseStore` additionally rejects the `.` / `..` path
+  components, so no case can address another case's directory.
 - Encryption at rest, signing, and external anchoring of the chain remain
   later-phase concerns (`SECURITY_BOUNDARIES`: enforcement is
   implementation-defined in later phases).
@@ -188,19 +198,19 @@ timelines, findings, reports, and exports"). Minimal fields for Phase 1D:
 - No IPC/service exposure of cases yet; that decision belongs to the phase
   that builds case services.
 
-## Next session: the case store layer
+## Phase 1D status: complete
 
-The case core is complete and validated. The next session implements:
+Phase 1D is implemented and validated:
 
-1. The `CaseStore` trait (create/load a case, run audited operations against
-   a stored case, read a case's audit log).
-2. `InMemoryCaseStore` and `FileCaseStore` with the per-case layout
-   (`<root>/cases/<case_id>/case.json` + `<root>/cases/<case_id>/evidence/`
-   as an existing `pursue-evidence` `FileStore`), case isolation, and
-   verification on open (audit chain + evidence-store open gates).
-3. Tamper-detection tests (manifest tampering breaks the chain) and
-   case-isolation tests, following `TESTING_STRATEGY.md`.
-4. Validate with the commands below; inspect `git diff`; commit.
+- Case core: `CaseId`, `Case`, `CaseStatus`, audited operations.
+- Store layer: `CaseStore` trait, `InMemoryCaseStore`, `FileCaseStore`
+  (per-case layout, case isolation, path-traversal guard, verification on
+  load, tamper detection).
+- Decisions: `DECISION_RECORD` B13 (boundary) and B14 (integrity envelope).
+
+Next starting point (next PURSUE session): **Phase 1E — Investigation
+Terminal planning/implementation readiness.** The case/evidence foundation
+provides the integrity primitives the terminal's evidence workflows build on.
 
 ## Validation
 

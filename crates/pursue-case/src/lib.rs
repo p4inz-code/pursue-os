@@ -13,6 +13,10 @@
 //! - **Audited operations** — every state-changing operation appends an event
 //!   to the case's hash-chained [`pursue_evidence::AuditLog`], reused
 //!   unchanged from `pursue-evidence`. No silent mutation is possible.
+//! - **Case stores** — the [`CaseStore`] trait with [`InMemoryCaseStore`]
+//!   (deterministic, for tests) and [`FileCaseStore`] (per-case isolation,
+//!   persistence, and verification on load, reusing the existing
+//!   `pursue-evidence` file store for evidence).
 //!
 //! Design rules (matching the locked boundary):
 //! - Evidence remains the immutable source of truth; cases reference evidence
@@ -20,19 +24,21 @@
 //! - No second evidence-integrity system: provenance and integrity primitives
 //!   stay in `pursue-evidence`.
 //! - No `unsafe` code (`unsafe_code = "deny"`), no database, no AI, no UI.
-//! - Trait-oriented so a `CaseStore` (persistence, case isolation, tamper
-//!   detection) can be added next without rework.
 
 #![deny(unsafe_code)]
 #![warn(missing_docs)]
 
 pub mod case;
 pub mod case_id;
+pub mod file_store;
+pub mod store;
 
 pub use case::{
     ACTION_CLOSED, ACTION_CREATED, ACTION_EVIDENCE_ATTACHED, ACTION_EVIDENCE_DETACHED,
     ACTION_NOTES_UPDATED, ACTION_REOPENED, ACTION_TITLE_UPDATED, Case, CaseStatus,
 };
 pub use case_id::CaseId;
+pub use file_store::FileCaseStore;
+pub use store::{CaseStore, InMemoryCaseStore};
 
 pub use pursue_core::{Error, Result};
