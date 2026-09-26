@@ -1,0 +1,20 @@
+[package]
+name = "pursue-terminal"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "PURSUE OS — investigation terminal foundation (session management, command model, execution abstractions)"
+
+[lints]
+workspace = true
+
+[dependencies]
+pursue-core = { path = "../pursue-core" }
+pursue-evidence = { path = "../pursue-evidence" }
+pursue-case = { path = "../pursue-case" }
+pursue-runtime = { path = "../pursue-runtime" }
+serde = { workspace = true }
+serde_json = { workspace = true }

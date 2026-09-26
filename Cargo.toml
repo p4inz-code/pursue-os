@@ -10,6 +10,7 @@ members = [
     "crates/pursue-evidence",
     "crates/pursue-case",
     "crates/pursue-runtime",
+    "crates/pursue-terminal",
 ]
 
 [workspace.package]

@@ -26,5 +26,14 @@
 
 ## Current Progress
 
-- Phase 1A: technical architecture lock — in progress (see DECISION_RECORD Part B and the foundation implementation).
-- Phases 1B–1F: not started.
+- **Completed:**
+  - Repository / CI foundation
+  - Foundation primitives (`crates/pursue-core`)
+  - Evidence integrity foundation (`crates/pursue-evidence`)
+  - Phase 1C: Core runtime (`crates/pursue-runtime`) — configuration, structured logging, service lifecycle, IPC boundary
+  - Phase 1D: Case foundation (`crates/pursue-case`) — case identifier, case container, audited operations, case store layer with per-case isolation and integrity verification
+  - Phase 1E: Terminal foundation (`crates/pursue-terminal`) — session lifecycle, execution abstractions (mock/process), bounded stream capture, evidence packaging, service & IPC routing
+- **Deferred:**
+  - Phase 1B: Minimal bootable base (deferred to Linux build host; see DECISION_RECORD B7)
+- **Subsequent:**
+  - Phase 1F: Browser + Tor foundation

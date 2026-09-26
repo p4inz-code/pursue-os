@@ -143,6 +143,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "pursue-terminal"
+version = "0.1.0"
+dependencies = [
+ "pursue-case",
+ "pursue-core",
+ "pursue-evidence",
+ "pursue-runtime",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "quote"
 version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
