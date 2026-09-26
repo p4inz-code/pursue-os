@@ -33,7 +33,8 @@
   - Phase 1C: Core runtime (`crates/pursue-runtime`) — configuration, structured logging, service lifecycle, IPC boundary
   - Phase 1D: Case foundation (`crates/pursue-case`) — case identifier, case container, audited operations, case store layer with per-case isolation and integrity verification
   - Phase 1E: Terminal foundation (`crates/pursue-terminal`) — session lifecycle, execution abstractions (mock/process), bounded stream capture, evidence packaging, service & IPC routing
+  - Phase 1F: Browser + Tor foundation (`crates/pursue-browser`) — session lifecycle, routing modes (direct/Tor), fail-closed Tor boundaries, profile isolation, navigation validation, web evidence capture orchestration, service & IPC routing
 - **Deferred:**
   - Phase 1B: Minimal bootable base (deferred to Linux build host; see DECISION_RECORD B7)
 - **Subsequent:**
-  - Phase 1F: Browser + Tor foundation
+  - Phase 1B / Phase 2: Live ISO / minimal bootable base and UI integration on dedicated Linux build host
