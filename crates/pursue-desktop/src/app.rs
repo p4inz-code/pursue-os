@@ -4,7 +4,10 @@ use egui::{Color32, RichText};
 
 use crate::client::IpcClient;
 use crate::state::{DesktopState, DesktopTab};
-use crate::views::{browser_view, case_view, status_bar, terminal_view};
+use crate::views::{
+    audit_view, browser_view, case_view, dashboard_view, evidence_view, report_view, status_bar,
+    terminal_view, timeline_view,
+};
 
 /// The PURSUE OS primary desktop shell application.
 pub struct PursueDesktopApp {
@@ -37,13 +40,18 @@ impl PursueDesktopApp {
                     .color(Color32::from_rgb(180, 180, 200)),
             );
 
-            ui.add_space(24.0);
+            ui.add_space(16.0);
 
             // Tab navigation buttons
             let tabs = [
+                (DesktopTab::Dashboard, "Dashboard"),
                 (DesktopTab::Cases, "Cases"),
+                (DesktopTab::Evidence, "Evidence"),
+                (DesktopTab::Timeline, "Timeline"),
+                (DesktopTab::Audit, "Audit Trail"),
                 (DesktopTab::Terminal, "Terminal"),
                 (DesktopTab::Browser, "Browser & Tor"),
+                (DesktopTab::Reports, "Reports"),
                 (DesktopTab::Settings, "Settings & IPC"),
             ];
 
@@ -79,9 +87,10 @@ impl PursueDesktopApp {
             ui.label(RichText::new("Security Boundary Contracts").strong());
             ui.label("• Tor Fail-Closed Boundary: ENFORCED (Direct fallback strictly forbidden)");
             ui.label("• DNS Privacy: Remote SOCKS5h Tor DNS Resolution Enforced");
-            ui.label("• Chain-of-Custody: SHA-256 Content Hashing + Merkle Audit Log");
+            ui.label("• Chain-of-Custody: SHA-256 Content Hashing + Hash-Chained Audit Log");
+            ui.label("• Path Safety: Strict Path Traversal Prevention on Export & Sessions");
             ui.label("• IPC Security: Local Domain Socket Dispatch, privilege separation");
-            ui.label("• UI Direct Access: FORBIDDEN — all actions dispatch through IPC Router");
+            ui.label("• UI Direct Access: FORBIDDEN — all actions mediated through IPC Router");
         });
 
         ui.add_space(12.0);
@@ -97,37 +106,33 @@ impl PursueDesktopApp {
         ui.add_space(12.0);
 
         ui.group(|ui| {
-            ui.label(RichText::new("IPC Subsystem Check").strong());
-            if ui.button("Probe IPC Handlers").clicked() {
-                // Check if terminal and browser handlers are responsive over IPC
-                let term_probe = self.client.call(
-                    "terminal",
-                    "session.get",
-                    serde_json::json!({ "session_id": "probe" }),
-                );
-                let browser_probe = self.client.call(
-                    "browser",
-                    "browser.session.get",
-                    serde_json::json!({ "session_id": "probe" }),
-                );
+            ui.label(RichText::new("IPC Subsystem Health Check").strong());
+            if ui.button("Probe All IPC Handlers").clicked() {
+                let case_probe = self.client.call("case", "case.list", serde_json::json!({}));
+                let report_probe = self.client.call("report", "report.preview_metadata", serde_json::json!({ "case_id": "probe" }));
+                let term_probe = self.client.call("terminal", "session.get", serde_json::json!({ "session_id": "probe" }));
+                let browser_probe = self.client.call("browser", "browser.session.get", serde_json::json!({ "session_id": "probe" }));
 
-                // In router, if service is registered, response will be from handler (e.g. SessionNotFound).
-                // If service is NOT registered, router error is ServiceNotFound.
-                let term_registered = match &term_probe {
+                let case_ok = case_probe.is_ok();
+                let report_ok = match &report_probe {
                     Err(e) => !e.to_string().contains("service not found"),
                     Ok(_) => true,
                 };
-                let browser_registered = match &browser_probe {
+                let term_ok = match &term_probe {
+                    Err(e) => !e.to_string().contains("service not found"),
+                    Ok(_) => true,
+                };
+                let browser_ok = match &browser_probe {
                     Err(e) => !e.to_string().contains("service not found"),
                     Ok(_) => true,
                 };
 
-                if term_registered && browser_registered {
+                if case_ok && report_ok && term_ok && browser_ok {
                     self.state
-                        .set_info("All backend IPC services verified and responsive.");
+                        .set_info("All backend IPC services (case, report, terminal, browser) verified and responsive.");
                 } else {
                     self.state.set_error(format!(
-                        "IPC Diagnostics: terminal={term_registered}, browser={browser_registered}"
+                        "IPC Diagnostics: case={case_ok}, report={report_ok}, terminal={term_ok}, browser={browser_ok}"
                     ));
                 }
             }
@@ -153,14 +158,29 @@ impl eframe::App for PursueDesktopApp {
 
         // Central Investigation Workspace
         egui::CentralPanel::default().show(ui, |ui| match self.state.active_tab {
+            DesktopTab::Dashboard => {
+                dashboard_view::render(ui, &mut self.state, &*self.client);
+            }
             DesktopTab::Cases => {
                 case_view::render(ui, &mut self.state, &*self.client);
+            }
+            DesktopTab::Evidence => {
+                evidence_view::render(ui, &mut self.state, &*self.client);
+            }
+            DesktopTab::Timeline => {
+                timeline_view::render(ui, &mut self.state, &*self.client);
+            }
+            DesktopTab::Audit => {
+                audit_view::render(ui, &mut self.state, &*self.client);
             }
             DesktopTab::Terminal => {
                 terminal_view::render(ui, &mut self.state, &*self.client);
             }
             DesktopTab::Browser => {
                 browser_view::render(ui, &mut self.state, &*self.client);
+            }
+            DesktopTab::Reports => {
+                report_view::render(ui, &mut self.state, &*self.client);
             }
             DesktopTab::Settings => {
                 self.render_settings(ui);

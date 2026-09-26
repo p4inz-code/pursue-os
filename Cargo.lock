@@ -1901,6 +1901,7 @@ version = "0.1.0"
 dependencies = [
  "pursue-core",
  "pursue-evidence",
+ "pursue-runtime",
  "serde",
  "serde_json",
 ]
@@ -1921,6 +1922,8 @@ dependencies = [
  "pursue-browser",
  "pursue-case",
  "pursue-core",
+ "pursue-evidence",
+ "pursue-report",
  "pursue-runtime",
  "pursue-terminal",
  "serde",
@@ -1932,6 +1935,19 @@ name = "pursue-evidence"
 version = "0.1.0"
 dependencies = [
  "pursue-core",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
+name = "pursue-report"
+version = "0.1.0"
+dependencies = [
+ "pursue-case",
+ "pursue-core",
+ "pursue-evidence",
+ "pursue-runtime",
  "serde",
  "serde_json",
  "sha2",

@@ -1,0 +1,21 @@
+[package]
+name = "pursue-report"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "PURSUE OS — forensic reporting and safe export foundation"
+
+[lints]
+workspace = true
+
+[dependencies]
+pursue-core = { path = "../pursue-core" }
+pursue-evidence = { path = "../pursue-evidence" }
+pursue-case = { path = "../pursue-case" }
+pursue-runtime = { path = "../pursue-runtime" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }

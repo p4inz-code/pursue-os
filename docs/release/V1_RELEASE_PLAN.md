@@ -36,8 +36,10 @@
   - Phase 1F: Browser + Tor foundation (`crates/pursue-browser`) — session lifecycle, routing modes (direct/Tor), fail-closed Tor boundaries, profile isolation, navigation validation, web evidence capture orchestration, service & IPC routing
   - Phase 1B: Bootable Base Configuration Foundation (`build/`) — Debian package manifests, systemd service units, sysusers/tmpfiles privilege definitions, validation scripts, build specifications (`docs/development/BOOTABLE_BASE.md`)
   - Phase 2: Desktop & IPC Foundation (`crates/pursue-desktop`) — egui/eframe desktop shell, strict IPC client dispatch, Case management view, Investigation Terminal console view, Investigation Browser & Tor console view, diagnostics & integration test suite (`docs/development/DESKTOP_FOUNDATION.md`)
+  - Phase 3: Investigation Workspace + Case Operations (`crates/pursue-case`, `crates/pursue-desktop`) — full case lifecycle (create, update title/notes, close, reopen, deep verify), investigation dashboard, evidence explorer, unified chronological investigation timeline, cryptographic hash-chain audit viewer (`docs/development/INVESTIGATION_WORKSPACE.md`)
+  - Phase 4: Forensic Reporting + Export Foundation (`crates/pursue-report`, `crates/pursue-desktop`) — dedicated reporting crate, deterministic JSON generation, self-contained printable HTML reporting, cryptographic report sealing, path traversal protection, secret scrubbing, atomic file export, disk report verification (`docs/development/REPORTING_FOUNDATION.md`)
 - **Pending External Host Execution:**
   - Live ISO binary generation (`build-iso.sh` on Linux host with root/container privileges; see DECISION_RECORD B7)
 - **Subsequent:**
-  - Advanced forensic reporting and graph visualization UI
+  - Advanced graph visualization UI
   - Hardware installer integration on target Linux image

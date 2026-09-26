@@ -68,6 +68,14 @@ fn setup_test_router(temp_dir: &Path) -> TestRouterBundle {
         .with_file_store(file_store.clone());
     router.register(Box::new(browser_handler)).unwrap();
 
+    // Setup case IPC handler
+    let case_handler = pursue_case::CaseHandler::new(file_store.clone());
+    router.register(Box::new(case_handler)).unwrap();
+
+    // Setup report IPC handler
+    let report_handler = pursue_report::ReportHandler::new(file_store.clone());
+    router.register(Box::new(report_handler)).unwrap();
+
     let shared_router = Arc::new(Mutex::new(router));
     (shared_router, file_store, mock_executor, mock_engine)
 }
@@ -75,7 +83,7 @@ fn setup_test_router(temp_dir: &Path) -> TestRouterBundle {
 #[test]
 fn test_desktop_state_initialization() {
     let state = DesktopState::new();
-    assert_eq!(state.active_tab, DesktopTab::Cases);
+    assert_eq!(state.active_tab, DesktopTab::Dashboard);
     assert_eq!(state.investigator_id, "investigator-01");
     assert!(state.active_case.is_none());
     assert!(state.cases.is_empty());
@@ -91,6 +99,9 @@ fn test_desktop_app_tab_switching() {
     let client = Box::new(RouterClient::new(router));
 
     let mut app = PursueDesktopApp::new(client);
+    assert_eq!(app.state.active_tab, DesktopTab::Dashboard);
+
+    app.state.active_tab = DesktopTab::Cases;
     assert_eq!(app.state.active_tab, DesktopTab::Cases);
 
     app.state.active_tab = DesktopTab::Terminal;
@@ -98,6 +109,9 @@ fn test_desktop_app_tab_switching() {
 
     app.state.active_tab = DesktopTab::Browser;
     assert_eq!(app.state.active_tab, DesktopTab::Browser);
+
+    app.state.active_tab = DesktopTab::Reports;
+    assert_eq!(app.state.active_tab, DesktopTab::Reports);
 
     app.state.active_tab = DesktopTab::Settings;
     assert_eq!(app.state.active_tab, DesktopTab::Settings);
@@ -265,4 +279,355 @@ fn test_bootable_base_config_validity() {
         cfg.ipc_socket_path,
         Some(PathBuf::from("/run/pursue/ipc.sock"))
     );
+}
+
+#[test]
+fn test_desktop_ipc_case_full_lifecycle_and_verification() {
+    let temp = TestDir::new("case-lifecycle");
+    let (router, _, _, _) = setup_test_router(temp.path());
+    let client = RouterClient::new(router);
+
+    // 1. Create case over IPC
+    let create_res = client
+        .create_case("CASE-INT-01", "Full Lifecycle Test", "investigator-01")
+        .unwrap();
+    assert_eq!(create_res["id"], "CASE-INT-01");
+    assert_eq!(create_res["status"], "open");
+
+    // 2. Get case over IPC
+    let get_res = client.get_case("CASE-INT-01").unwrap();
+    assert_eq!(get_res["title"], "Full Lifecycle Test");
+    assert_eq!(get_res["evidence_count"], 0);
+
+    // 3. Update title and notes over IPC
+    let title_res = client
+        .update_case_title("CASE-INT-01", "Updated Lifecycle Title", "investigator-01")
+        .unwrap();
+    assert_eq!(title_res["title"], "Updated Lifecycle Title");
+
+    let notes_res = client
+        .update_case_notes("CASE-INT-01", "Lead details recorded.", "investigator-01")
+        .unwrap();
+    assert_eq!(notes_res["notes"], "Lead details recorded.");
+
+    // 4. Close and Reopen over IPC
+    let close_res = client.close_case("CASE-INT-01", "investigator-01").unwrap();
+    assert_eq!(close_res["status"], "closed");
+
+    let reopen_res = client
+        .reopen_case("CASE-INT-01", "investigator-01")
+        .unwrap();
+    assert_eq!(reopen_res["status"], "open");
+
+    // 5. Deep verify over IPC
+    let verify_res = client.verify_case("CASE-INT-01").unwrap();
+    assert_eq!(verify_res["verified"], true);
+    assert_eq!(verify_res["manifest_verified"], true);
+    assert_eq!(verify_res["audit_chain_verified"], true);
+
+    // 6. Inspect audit list over IPC
+    let audit_res = client.list_case_audit("CASE-INT-01").unwrap();
+    assert_eq!(audit_res["chain_verified"], true);
+    // Events: created, title_updated, notes_updated, closed, reopened
+    assert_eq!(audit_res["events_count"], 5);
+
+    // 7. List cases over IPC
+    let list_res = client.list_cases().unwrap();
+    let arr = list_res.as_array().unwrap();
+    assert_eq!(arr.len(), 1);
+    assert_eq!(arr[0]["id"], "CASE-INT-01");
+}
+
+#[test]
+fn test_cross_case_isolation_and_evidence_partitioning() {
+    let temp = TestDir::new("case-isolation");
+    let (router, file_store, mock_exec, mock_engine) = setup_test_router(temp.path());
+    let client = RouterClient::new(router);
+
+    // Create Case A and Case B
+    client
+        .create_case("CASE-ISO-A", "Case A Target", "analyst-a")
+        .unwrap();
+    client
+        .create_case("CASE-ISO-B", "Case B Target", "analyst-b")
+        .unwrap();
+
+    // 1. Execute terminal command in Case A session and capture
+    client
+        .create_terminal_session("sess-a", "CASE-ISO-A", "analyst-a")
+        .unwrap();
+    mock_exec.register(
+        "nmap",
+        MockOutcome::Success {
+            exit_code: Some(0),
+            stdout: b"Port 80 open on host A".to_vec(),
+            stderr: Vec::new(),
+            timed_out: false,
+            truncated: false,
+        },
+    );
+    let exec_res = client
+        .execute_terminal_command("sess-a", "nmap", &[])
+        .unwrap();
+    let cap_a = client
+        .capture_terminal_evidence("sess-a", exec_res, "stdout")
+        .unwrap();
+    let addr_a = cap_a["content_address"].as_str().unwrap().to_string();
+
+    // 2. Navigate browser in Case B session and capture
+    client
+        .create_browser_session("sess-b", "CASE-ISO-B", "analyst-b", "tor")
+        .unwrap();
+    let target_b = "http://target-b-service.onion";
+    mock_engine.register(
+        target_b,
+        MockResponse::Success {
+            status_code: 200,
+            headers: BTreeMap::new(),
+            body: b"Host B Portal".to_vec(),
+            final_url: None,
+        },
+    );
+    let nav_res = client.navigate_browser("sess-b", target_b).unwrap();
+    let cap_b = client
+        .capture_browser_evidence("sess-b", nav_res, "page_content")
+        .unwrap();
+    let addr_b = cap_b["address"].as_str().unwrap().to_string();
+
+    // Verify Case A has only evidence A
+    let ev_list_a = client.list_case_evidence("CASE-ISO-A").unwrap();
+    let addrs_a: Vec<&str> = ev_list_a
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|e| e["address"].as_str().unwrap())
+        .collect();
+    assert_eq!(addrs_a.len(), 1);
+    assert_eq!(addrs_a[0], addr_a);
+    assert!(!addrs_a.contains(&addr_b.as_str()));
+
+    // Verify Case B has only evidence B
+    let ev_list_b = client.list_case_evidence("CASE-ISO-B").unwrap();
+    let addrs_b: Vec<&str> = ev_list_b
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|e| e["address"].as_str().unwrap())
+        .collect();
+    assert_eq!(addrs_b.len(), 1);
+    assert_eq!(addrs_b[0], addr_b);
+    assert!(!addrs_b.contains(&addr_a.as_str()));
+
+    // Verify independent audit chains
+    let store = file_store.lock().unwrap();
+    let case_a_loaded = store
+        .load_case(&pursue_case::CaseId::new("CASE-ISO-A").unwrap())
+        .unwrap();
+    let case_b_loaded = store
+        .load_case(&pursue_case::CaseId::new("CASE-ISO-B").unwrap())
+        .unwrap();
+    assert!(case_a_loaded.audit_log().verify().is_ok());
+    assert!(case_b_loaded.audit_log().verify().is_ok());
+}
+
+#[test]
+fn test_desktop_ipc_reporting_workflow_and_verification() {
+    let temp = TestDir::new("report-workflow");
+    let (router, _file_store, mock_exec, _) = setup_test_router(temp.path());
+    let client = RouterClient::new(router);
+
+    // Setup Case with Evidence
+    client
+        .create_case("CASE-REP-TEST", "Operation Reporting", "investigator-01")
+        .unwrap();
+    client
+        .update_case_notes(
+            "CASE-REP-TEST",
+            "Critical forensic findings.",
+            "investigator-01",
+        )
+        .unwrap();
+
+    client
+        .create_terminal_session("term-rep", "CASE-REP-TEST", "investigator-01")
+        .unwrap();
+    mock_exec.register(
+        "exiftool",
+        MockOutcome::Success {
+            exit_code: Some(0),
+            stdout: b"Camera Model: SuperCam 5000\nGPS: 48.8584 N, 2.2945 E\n".to_vec(),
+            stderr: Vec::new(),
+            timed_out: false,
+            truncated: false,
+        },
+    );
+    let exec_res = client
+        .execute_terminal_command("term-rep", "exiftool", &[])
+        .unwrap();
+    let _ = client
+        .capture_terminal_evidence("term-rep", exec_res, "stdout")
+        .unwrap();
+
+    // 1. Preview report metadata
+    let preview = client.preview_report_metadata("CASE-REP-TEST").unwrap();
+    assert_eq!(preview["case_id"], "CASE-REP-TEST");
+    assert_eq!(preview["evidence_count"], 1);
+    assert_eq!(preview["audit_chain_verified"], true);
+
+    // 2. Generate in-memory JSON report
+    let rep_json = client
+        .generate_report("CASE-REP-TEST", "investigator-01", "json")
+        .unwrap();
+    assert_eq!(rep_json["format"], "json");
+    let hash_json = rep_json["report_hash"].as_str().unwrap();
+    assert!(!hash_json.is_empty());
+    assert!(
+        rep_json["content"]
+            .as_str()
+            .unwrap()
+            .contains("SuperCam 5000")
+    );
+
+    // 3. Generate in-memory HTML report
+    let rep_html = client
+        .generate_report("CASE-REP-TEST", "investigator-01", "html")
+        .unwrap();
+    assert_eq!(rep_html["format"], "html");
+    let html_content = rep_html["content"].as_str().unwrap();
+    assert!(html_content.contains("<!DOCTYPE html>"));
+    assert!(html_content.contains("Cryptographic Integrity Seal"));
+    assert!(html_content.contains("SuperCam 5000"));
+    assert!(!html_content.contains("<script"));
+
+    // 4. Safe Export to Disk (JSON)
+    let export_json_path = temp.path().join("exports/report.json");
+    let exp_json_res = client
+        .export_report(
+            "CASE-REP-TEST",
+            "investigator-01",
+            "json",
+            export_json_path.to_str().unwrap(),
+        )
+        .unwrap();
+    assert_eq!(exp_json_res["verified"], true);
+    assert!(export_json_path.exists());
+
+    // 5. Verify exported report on disk
+    let ver_res = client
+        .verify_report(export_json_path.to_str().unwrap())
+        .unwrap();
+    assert_eq!(ver_res["verified"], true);
+    assert_eq!(ver_res["report_hash"].as_str().unwrap(), hash_json);
+
+    // 6. Safe Export to Disk (HTML)
+    let export_html_path = temp.path().join("exports/report.html");
+    let exp_html_res = client
+        .export_report(
+            "CASE-REP-TEST",
+            "investigator-01",
+            "html",
+            export_html_path.to_str().unwrap(),
+        )
+        .unwrap();
+    assert_eq!(exp_html_res["verified"], true);
+    assert!(export_html_path.exists());
+
+    // 7. Verify exported HTML report on disk
+    let ver_html_res = client
+        .verify_report(export_html_path.to_str().unwrap())
+        .unwrap();
+    assert_eq!(ver_html_res["verified"], true);
+
+    // 8. Tamper detection test
+    let tampered_path = temp.path().join("exports/report_tampered.json");
+    fs::copy(&export_json_path, &tampered_path).unwrap();
+    let original_json = fs::read_to_string(&tampered_path).unwrap();
+    let altered_json = original_json.replace("SuperCam 5000", "TamperedCamera 9999");
+    fs::write(&tampered_path, altered_json).unwrap();
+
+    let tamper_check = client.verify_report(tampered_path.to_str().unwrap());
+    assert!(
+        tamper_check.is_err(),
+        "Tampered report file must fail cryptographic verification"
+    );
+}
+
+#[test]
+fn test_report_export_path_traversal_rejection() {
+    let temp = TestDir::new("export-traversal");
+    let (router, _, _, _) = setup_test_router(temp.path());
+    let client = RouterClient::new(router);
+
+    client
+        .create_case("CASE-TRAV", "Traversal Case", "analyst")
+        .unwrap();
+
+    let evil_path = "../../etc/shadow";
+    let res = client.export_report("CASE-TRAV", "analyst", "json", evil_path);
+    assert!(
+        res.is_err(),
+        "Path traversal target must be strictly rejected"
+    );
+}
+
+#[test]
+fn test_tor_fail_closed_behavior_maintained() {
+    let temp = TestDir::new("tor-fail-closed");
+    let (router, _, _, mock_engine) = setup_test_router(temp.path());
+    let client = RouterClient::new(router);
+
+    client
+        .create_case("CASE-TOR", "Tor Security Case", "analyst")
+        .unwrap();
+    client
+        .create_browser_session("sess-tor-down", "CASE-TOR", "analyst", "tor")
+        .unwrap();
+
+    // Disable Tor availability in mock engine
+    mock_engine.set_tor_available(false);
+
+    let nav_res = client.navigate_browser("sess-tor-down", "http://any-onion-site.onion");
+    assert!(
+        nav_res.is_err(),
+        "Tor session MUST fail closed when Tor daemon is unavailable"
+    );
+    let err_str = nav_res.err().unwrap().to_string();
+    assert!(
+        err_str.contains("Tor") || err_str.contains("unavailable") || err_str.contains("IPC Error"),
+        "Error message should reflect Tor failure: {err_str}"
+    );
+}
+
+#[test]
+fn test_empty_case_and_error_resiliency() {
+    let temp = TestDir::new("error-resiliency");
+    let (router, _, _, _) = setup_test_router(temp.path());
+    let client = RouterClient::new(router);
+
+    // 1. Non-existent case query
+    let get_missing = client.get_case("NONEXISTENT-CASE");
+    assert!(get_missing.is_err());
+
+    // 2. Create valid empty case
+    client
+        .create_case("CASE-EMPTY", "Empty Case", "analyst")
+        .unwrap();
+
+    // Report generation on empty case succeeds with clean empty inventory
+    let rep_res = client
+        .generate_report("CASE-EMPTY", "analyst", "json")
+        .unwrap();
+    assert_eq!(rep_res["format"], "json");
+
+    // Reopening an already open case fails cleanly
+    let reopen_open = client.reopen_case("CASE-EMPTY", "analyst");
+    assert!(reopen_open.is_err());
+
+    // Closing case succeeds
+    let close_res = client.close_case("CASE-EMPTY", "analyst");
+    assert!(close_res.is_ok());
+
+    // Closing an already closed case fails cleanly
+    let close_closed = client.close_case("CASE-EMPTY", "analyst");
+    assert!(close_closed.is_err());
 }

@@ -126,6 +126,135 @@ impl RouterClient {
         });
         self.call("browser", "browser.evidence.capture", params)
     }
+
+    // --- Case Service Methods ---
+
+    /// Creates a new forensic case.
+    pub fn create_case(&self, id: &str, title: &str, actor: &str) -> Result<JsonValue> {
+        let params = json!({
+            "id": id,
+            "title": title,
+            "actor": actor,
+        });
+        self.call("case", "case.create", params)
+    }
+
+    /// Loads a case by ID.
+    pub fn get_case(&self, id: &str) -> Result<JsonValue> {
+        let params = json!({ "id": id });
+        self.call("case", "case.get", params)
+    }
+
+    /// Lists summaries of all stored cases.
+    pub fn list_cases(&self) -> Result<JsonValue> {
+        self.call("case", "case.list", json!({}))
+    }
+
+    /// Updates investigator notes on an open case.
+    pub fn update_case_notes(&self, id: &str, notes: &str, actor: &str) -> Result<JsonValue> {
+        let params = json!({
+            "id": id,
+            "notes": notes,
+            "actor": actor,
+        });
+        self.call("case", "case.update_notes", params)
+    }
+
+    /// Updates investigator title on an open case.
+    pub fn update_case_title(&self, id: &str, title: &str, actor: &str) -> Result<JsonValue> {
+        let params = json!({
+            "id": id,
+            "title": title,
+            "actor": actor,
+        });
+        self.call("case", "case.update_title", params)
+    }
+
+    /// Closes an open case.
+    pub fn close_case(&self, id: &str, actor: &str) -> Result<JsonValue> {
+        let params = json!({
+            "id": id,
+            "actor": actor,
+        });
+        self.call("case", "case.close", params)
+    }
+
+    /// Reopens a closed case.
+    pub fn reopen_case(&self, id: &str, actor: &str) -> Result<JsonValue> {
+        let params = json!({
+            "id": id,
+            "actor": actor,
+        });
+        self.call("case", "case.reopen", params)
+    }
+
+    /// Runs deep integrity verification on a case.
+    pub fn verify_case(&self, id: &str) -> Result<JsonValue> {
+        let params = json!({ "id": id });
+        self.call("case", "case.verify", params)
+    }
+
+    /// Lists evidence attached to a case.
+    pub fn list_case_evidence(&self, id: &str) -> Result<JsonValue> {
+        let params = json!({ "id": id });
+        self.call("case", "case.evidence.list", params)
+    }
+
+    /// Reads and inspects a specific evidence artifact blob.
+    pub fn read_case_evidence(&self, id: &str, address: &str) -> Result<JsonValue> {
+        let params = json!({
+            "id": id,
+            "address": address,
+        });
+        self.call("case", "case.evidence.read", params)
+    }
+
+    /// Lists hash-chained audit log events for a case.
+    pub fn list_case_audit(&self, id: &str) -> Result<JsonValue> {
+        let params = json!({ "id": id });
+        self.call("case", "case.audit.list", params)
+    }
+
+    // --- Report Service Methods ---
+
+    /// Generates an in-memory report in JSON or HTML format.
+    pub fn generate_report(&self, case_id: &str, actor: &str, format: &str) -> Result<JsonValue> {
+        let params = json!({
+            "case_id": case_id,
+            "actor": actor,
+            "format": format,
+        });
+        self.call("report", "report.generate", params)
+    }
+
+    /// Retrieves preview metrics for reporting.
+    pub fn preview_report_metadata(&self, case_id: &str) -> Result<JsonValue> {
+        let params = json!({ "case_id": case_id });
+        self.call("report", "report.preview_metadata", params)
+    }
+
+    /// Atomically exports a forensic report to disk.
+    pub fn export_report(
+        &self,
+        case_id: &str,
+        actor: &str,
+        format: &str,
+        target_path: &str,
+    ) -> Result<JsonValue> {
+        let params = json!({
+            "case_id": case_id,
+            "actor": actor,
+            "format": format,
+            "target_path": target_path,
+        });
+        self.call("report", "report.export", params)
+    }
+
+    /// Verifies the cryptographic seal of an exported report on disk.
+    pub fn verify_report(&self, file_path: &str) -> Result<JsonValue> {
+        let params = json!({ "file_path": file_path });
+        self.call("report", "report.verify", params)
+    }
 }
 
 impl IpcClient for RouterClient {
