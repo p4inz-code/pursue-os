@@ -12,6 +12,7 @@ members = [
     "crates/pursue-runtime",
     "crates/pursue-terminal",
     "crates/pursue-browser",
+    "crates/pursue-desktop",
 ]
 
 [workspace.package]

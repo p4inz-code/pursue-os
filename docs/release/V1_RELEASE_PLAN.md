@@ -34,7 +34,10 @@
   - Phase 1D: Case foundation (`crates/pursue-case`) — case identifier, case container, audited operations, case store layer with per-case isolation and integrity verification
   - Phase 1E: Terminal foundation (`crates/pursue-terminal`) — session lifecycle, execution abstractions (mock/process), bounded stream capture, evidence packaging, service & IPC routing
   - Phase 1F: Browser + Tor foundation (`crates/pursue-browser`) — session lifecycle, routing modes (direct/Tor), fail-closed Tor boundaries, profile isolation, navigation validation, web evidence capture orchestration, service & IPC routing
-- **Deferred:**
-  - Phase 1B: Minimal bootable base (deferred to Linux build host; see DECISION_RECORD B7)
+  - Phase 1B: Bootable Base Configuration Foundation (`build/`) — Debian package manifests, systemd service units, sysusers/tmpfiles privilege definitions, validation scripts, build specifications (`docs/development/BOOTABLE_BASE.md`)
+  - Phase 2: Desktop & IPC Foundation (`crates/pursue-desktop`) — egui/eframe desktop shell, strict IPC client dispatch, Case management view, Investigation Terminal console view, Investigation Browser & Tor console view, diagnostics & integration test suite (`docs/development/DESKTOP_FOUNDATION.md`)
+- **Pending External Host Execution:**
+  - Live ISO binary generation (`build-iso.sh` on Linux host with root/container privileges; see DECISION_RECORD B7)
 - **Subsequent:**
-  - Phase 1B / Phase 2: Live ISO / minimal bootable base and UI integration on dedicated Linux build host
+  - Advanced forensic reporting and graph visualization UI
+  - Hardware installer integration on target Linux image

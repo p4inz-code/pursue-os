@@ -1,0 +1,25 @@
+[package]
+name = "pursue-desktop"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "PURSUE OS — Investigation desktop shell & IPC client application"
+
+[lints]
+workspace = true
+
+[dependencies]
+pursue-core = { path = "../pursue-core" }
+pursue-runtime = { path = "../pursue-runtime" }
+pursue-case = { path = "../pursue-case" }
+pursue-terminal = { path = "../pursue-terminal" }
+pursue-browser = { path = "../pursue-browser" }
+serde = { workspace = true }
+serde_json = { workspace = true }
+egui = "0.36"
+eframe = { version = "0.36", default-features = false, features = ["default_fonts", "wayland", "x11", "wgpu"] }
+
+

@@ -1,0 +1,24 @@
+[Unit]
+Description=PURSUE OS Investigation Terminal Service
+Documentation=https://github.com/p4inz-code/pursue-os
+After=pursue-runtime.service
+Requires=pursue-runtime.service
+
+[Service]
+Type=simple
+User=pursue
+Group=pursue-investigator
+UMask=0007
+ExecStart=/usr/lib/pursue/bin/pursue-terminal --socket /run/pursue/ipc.sock
+Restart=on-failure
+RestartSec=5s
+
+# Security Hardening
+ProtectSystem=full
+ProtectHome=read-only
+ReadWritePaths=/var/lib/pursue/cases /run/pursue
+PrivateTmp=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

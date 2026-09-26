@@ -1,0 +1,17 @@
+[Unit]
+Description=PURSUE OS Tor Onion Router Integration
+Documentation=man:tor(1) https://www.torproject.org
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=debian-tor
+Group=debian-tor
+ExecStart=/usr/bin/tor -f /etc/tor/torrc
+Restart=on-failure
+RestartSec=3s
+LimitNOFILE=32768
+
+[Install]
+WantedBy=multi-user.target

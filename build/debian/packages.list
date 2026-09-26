@@ -1,0 +1,60 @@
+# PURSUE OS — Minimal Bootable Base Package Manifest (Phase 1B)
+# Debian 13 (Trixie) / 12 (Bookworm) minimal package selection.
+# Strict inclusion policy: only core OS, init, security, and networking.
+# No penetration-testing bloat, no duplicate tools, no telemetry.
+
+# Base System & Kernel
+systemd
+systemd-sysv
+udev
+dbus
+linux-image-amd64
+kmod
+sudo
+locales
+tzdata
+
+# Bootloader (UEFI + BIOS)
+grub-efi-amd64-bin
+grub-pc-bin
+shim-signed
+efibootmgr
+
+# Core Utilities & Filesystem
+coreutils
+util-linux
+tar
+gzip
+bzip2
+xz-utils
+zstd
+e2fsprogs
+dosfstools
+squashfs-tools
+
+# Networking & Cryptography
+iproute2
+iputils-ping
+nftables
+ca-certificates
+openssl
+wpasupplicant
+curl
+wget
+
+# Tor Platform Foundation
+tor
+torsocks
+
+# Audio & Display Subsystem
+wayland-protocols
+libwayland-client0
+libwayland-server0
+weston
+pipewire
+pipewire-audio-client-libraries
+
+# Fonts & UI Support
+fonts-dejavu-core
+fonts-liberation
+adwaita-icon-theme

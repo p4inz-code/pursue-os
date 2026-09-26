@@ -3,7 +3,13 @@
 **/target/
 
 # Future OS build artifacts
-/build/
+/build/output/
+/build/chroot/
+/build/cache/
+!/build/debian/
+!/build/systemd/
+!/build/config/
+!/build/scripts/
 *.deb
 *.iso
 *.img

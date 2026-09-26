@@ -1,0 +1,7 @@
+# PURSUE OS System Configuration (/etc/pursue/config.toml)
+# Authoritative configuration parsed by pursue_runtime::config::Config.
+
+version = 1
+log_level = "info"
+data_dir = "/var/lib/pursue"
+ipc_socket_path = "/run/pursue/ipc.sock"
