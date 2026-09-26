@@ -47,6 +47,9 @@ pub trait CaseStore {
 
     /// The verified audit log (provenance history) of a case.
     fn audit_log(&self, id: &CaseId) -> Result<AuditLog>;
+
+    /// Lists all case identifiers currently in the store, in ascending order.
+    fn list_cases(&self) -> Result<Vec<CaseId>>;
 }
 
 /// An in-memory case store.
@@ -99,6 +102,10 @@ impl CaseStore for InMemoryCaseStore {
 
     fn audit_log(&self, id: &CaseId) -> Result<AuditLog> {
         Ok(self.load_case(id)?.audit_log().clone())
+    }
+
+    fn list_cases(&self) -> Result<Vec<CaseId>> {
+        Ok(self.cases.keys().cloned().collect())
     }
 }
 

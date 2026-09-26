@@ -31,6 +31,7 @@
 pub mod case;
 pub mod case_id;
 pub mod file_store;
+pub mod ipc;
 pub mod store;
 
 pub use case::{
@@ -39,6 +40,7 @@ pub use case::{
 };
 pub use case_id::CaseId;
 pub use file_store::FileCaseStore;
+pub use ipc::CaseHandler;
 pub use store::{CaseStore, InMemoryCaseStore};
 
 pub use pursue_core::{Error, Result};

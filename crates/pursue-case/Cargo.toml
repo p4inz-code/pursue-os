@@ -14,5 +14,6 @@ workspace = true
 [dependencies]
 pursue-core = { path = "../pursue-core" }
 pursue-evidence = { path = "../pursue-evidence" }
+pursue-runtime = { path = "../pursue-runtime" }
 serde = { workspace = true }
 serde_json = { workspace = true }

@@ -199,6 +199,28 @@ impl CaseStore for FileCaseStore {
     fn audit_log(&self, id: &CaseId) -> Result<AuditLog> {
         Ok(self.load_case(id)?.audit_log().clone())
     }
+
+    fn list_cases(&self) -> Result<Vec<CaseId>> {
+        let cases_dir = self.root.join("cases");
+        if !cases_dir.exists() {
+            return Ok(Vec::new());
+        }
+        let mut ids = Vec::new();
+        for entry in fs::read_dir(&cases_dir)? {
+            let entry = entry?;
+            if entry.file_type()?.is_dir() {
+                if let Ok(name) = entry.file_name().into_string() {
+                    if let Ok(case_id) = CaseId::new(&name) {
+                        if self.manifest_path(&case_id)?.exists() {
+                            ids.push(case_id);
+                        }
+                    }
+                }
+            }
+        }
+        ids.sort();
+        Ok(ids)
+    }
 }
 
 #[cfg(test)]
