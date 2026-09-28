@@ -168,7 +168,9 @@ mod tests {
 
     #[test]
     fn runtime_lifecycle_terminates_active_sessions_on_shutdown() {
-        let mut service = BrowserService::new(PathBuf::from("/tmp/pursue-shutdown-test"));
+        let dir = std::env::temp_dir().join(format!("pursue-shutdown-test-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let mut service = BrowserService::new(dir);
         let sid = BrowserSessionId::new("sess-shutdown").unwrap();
         let cid = CaseId::new("case-shutdown").unwrap();
 

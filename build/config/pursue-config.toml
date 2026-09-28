@@ -1,7 +1,12 @@
 # PURSUE OS System Configuration (/etc/pursue/config.toml)
 # Authoritative configuration parsed by pursue_runtime::config::Config.
+# All optional path fields default to subdirectories of data_dir when absent.
 
 version = 1
 log_level = "info"
 data_dir = "/var/lib/pursue"
 ipc_socket_path = "/run/pursue/ipc.sock"
+case_dir = "/var/lib/pursue/cases"
+browser_profile_dir = "/var/lib/pursue/profiles"
+report_dir = "/var/lib/pursue/reports"
+log_file = "/var/log/pursue/runtime.log"

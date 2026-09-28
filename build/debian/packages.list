@@ -50,7 +50,9 @@ torsocks
 wayland-protocols
 libwayland-client0
 libwayland-server0
-weston
+sway
+swaylock
+swaybg
 pipewire
 pipewire-audio-client-libraries
 

@@ -1,19 +1,19 @@
 [Unit]
 Description=PURSUE OS Core Runtime & IPC Router Service
 Documentation=https://github.com/p4inz-code/pursue-os
-After=network.target local-fs.target
-Wants=network.target
+After=network.target local-fs.target tor.service
+Wants=network.target tor.service
 
 [Service]
 Type=simple
 User=pursue
 Group=pursue-investigator
 UMask=0007
-ExecStart=/usr/lib/pursue/bin/pursue-runtime --config /etc/pursue/config.toml
+ExecStart=/usr/lib/pursue/bin/pursue-desktop --headless --config /etc/pursue/config.toml
 Restart=on-failure
 RestartSec=5s
 
-# Security Hardening
+# Security Hardening (A-011: single monolithic runtime)
 ProtectSystem=strict
 ProtectHome=true
 ReadWritePaths=/var/lib/pursue /var/log/pursue /run/pursue

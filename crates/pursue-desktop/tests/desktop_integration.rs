@@ -1,4 +1,5 @@
-//! Comprehensive integration tests for `pursue-desktop` (Phase 2) and `build/config` (Phase 1B).
+//! Comprehensive integration tests for `pursue-desktop` (Phase 2, Phase 5 OS Integration)
+//! and `build/config` (Phase 1B, Phase 5, Phase 6).
 
 use std::collections::BTreeMap;
 use std::fs;
@@ -278,6 +279,38 @@ fn test_bootable_base_config_validity() {
     assert_eq!(
         cfg.ipc_socket_path,
         Some(PathBuf::from("/run/pursue/ipc.sock"))
+    );
+    // Phase 5: deployment path fields
+    assert_eq!(cfg.case_dir, Some(PathBuf::from("/var/lib/pursue/cases")));
+    assert_eq!(
+        cfg.browser_profile_dir,
+        Some(PathBuf::from("/var/lib/pursue/profiles"))
+    );
+    assert_eq!(
+        cfg.report_dir,
+        Some(PathBuf::from("/var/lib/pursue/reports"))
+    );
+    assert_eq!(
+        cfg.log_file,
+        Some(PathBuf::from("/var/log/pursue/runtime.log"))
+    );
+
+    // Resolvers return the explicit values when set
+    assert_eq!(
+        cfg.resolve_case_dir(),
+        PathBuf::from("/var/lib/pursue/cases")
+    );
+    assert_eq!(
+        cfg.resolve_browser_profile_dir(),
+        PathBuf::from("/var/lib/pursue/profiles")
+    );
+    assert_eq!(
+        cfg.resolve_report_dir(),
+        PathBuf::from("/var/lib/pursue/reports")
+    );
+    assert_eq!(
+        cfg.resolve_log_file(),
+        PathBuf::from("/var/log/pursue/runtime.log")
     );
 }
 
@@ -630,4 +663,243 @@ fn test_empty_case_and_error_resiliency() {
     // Closing an already closed case fails cleanly
     let close_closed = client.close_case("CASE-EMPTY", "analyst");
     assert!(close_closed.is_err());
+}
+
+// ===========================================================================
+// Phase 5: OS Integration Tests
+// ===========================================================================
+
+#[test]
+fn test_phase5_systemd_runtime_unit_references_pursue_desktop() {
+    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
+
+    let unit_path = repo_root.join("build/systemd/pursue-runtime.service");
+    assert!(unit_path.exists(), "pursue-runtime.service must exist");
+
+    let content = fs::read_to_string(&unit_path).unwrap();
+
+    // Decision A-011: single binary model — ExecStart must reference pursue-desktop
+    assert!(
+        content.contains("pursue-desktop"),
+        "pursue-runtime.service ExecStart must reference pursue-desktop binary (A-011)"
+    );
+    assert!(
+        content.contains("--headless"),
+        "pursue-runtime.service must run in headless mode"
+    );
+    assert!(
+        content.contains("--config"),
+        "pursue-runtime.service must accept a config path"
+    );
+
+    // Security hardening
+    assert!(content.contains("ProtectSystem=strict"));
+    assert!(content.contains("NoNewPrivileges=true"));
+    assert!(content.contains("ProtectHome=true"));
+    assert!(content.contains("PrivateTmp=true"));
+    assert!(content.contains("MemoryDenyWriteExecute=true"));
+}
+
+#[test]
+fn test_phase5_no_spurious_service_binaries() {
+    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
+
+    // Decision A-011: terminal and browser run in-process, not as separate binaries.
+    // Their systemd units must NOT exist.
+    assert!(
+        !repo_root
+            .join("build/systemd/pursue-terminal.service")
+            .exists(),
+        "pursue-terminal.service must not exist (A-011: in-process handler)"
+    );
+    assert!(
+        !repo_root
+            .join("build/systemd/pursue-browser.service")
+            .exists(),
+        "pursue-browser.service must not exist (A-011: in-process handler)"
+    );
+}
+
+#[test]
+fn test_phase5_desktop_service_unit_exists() {
+    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
+
+    let unit_path = repo_root.join("build/systemd/pursue-desktop.service");
+    assert!(unit_path.exists(), "pursue-desktop.service must exist");
+
+    let content = fs::read_to_string(&unit_path).unwrap();
+
+    // Desktop runs as pursue-investigator (A-008)
+    assert!(
+        content.contains("User=pursue-investigator"),
+        "Desktop must run as pursue-investigator"
+    );
+    // Depends on runtime
+    assert!(
+        content.contains("Requires=pursue-runtime.service"),
+        "Desktop must depend on pursue-runtime.service"
+    );
+    // Security: zero direct access (A-007)
+    assert!(content.contains("NoNewPrivileges=true"));
+}
+
+#[test]
+fn test_phase5_sysusers_defines_both_accounts() {
+    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
+
+    let sysusers_path = repo_root.join("build/config/sysusers.d-pursue.conf");
+    assert!(sysusers_path.exists(), "sysusers config must exist");
+
+    let content = fs::read_to_string(&sysusers_path).unwrap();
+
+    // Decision A-008: two-user model
+    assert!(
+        content.contains("u pursue "),
+        "sysusers must define 'pursue' system daemon user"
+    );
+    assert!(
+        content.contains("u pursue-investigator"),
+        "sysusers must define 'pursue-investigator' interactive user"
+    );
+    assert!(
+        content.contains("/usr/sbin/nologin"),
+        "'pursue' user must have nologin shell"
+    );
+    assert!(
+        content.contains("/bin/bash"),
+        "'pursue-investigator' must have bash shell"
+    );
+}
+
+#[test]
+fn test_phase5_tmpfiles_covers_all_storage_directories() {
+    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
+
+    let tmpfiles_path = repo_root.join("build/config/tmpfiles.d-pursue.conf");
+    assert!(tmpfiles_path.exists(), "tmpfiles config must exist");
+
+    let content = fs::read_to_string(&tmpfiles_path).unwrap();
+
+    // All deployment directories must be declared
+    let required_dirs = [
+        "/run/pursue",
+        "/var/lib/pursue",
+        "/var/lib/pursue/cases",
+        "/var/lib/pursue/profiles",
+        "/var/lib/pursue/reports",
+        "/var/log/pursue",
+    ];
+    for dir in &required_dirs {
+        assert!(
+            content.contains(dir),
+            "tmpfiles must declare directory: {dir}"
+        );
+    }
+}
+
+#[test]
+fn test_phase5_packages_list_includes_sway() {
+    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
+
+    let packages_path = repo_root.join("build/debian/packages.list");
+    assert!(packages_path.exists(), "packages.list must exist");
+
+    let content = fs::read_to_string(&packages_path).unwrap();
+    let lines: Vec<&str> = content.lines().collect();
+
+    // Decision A-002: Wayland-first desktop (Sway compositor)
+    assert!(
+        lines.iter().any(|l| l.trim() == "sway"),
+        "packages.list must include sway (Decision A-002)"
+    );
+    // Tor must be present for fail-closed (A-006)
+    assert!(
+        lines.iter().any(|l| l.trim() == "tor"),
+        "packages.list must include tor (Decision A-006)"
+    );
+}
+
+#[test]
+fn test_phase5_config_driven_service_initialization() {
+    let temp = TestDir::new("config-init");
+    let (router, _, _, _) = setup_test_router(temp.path());
+    let client = RouterClient::new(router);
+
+    // Verify all four in-process services are registered and responsive
+    // Case service
+    let case_res = client.create_case("CASE-CFG-01", "Config Test", "investigator-01");
+    assert!(case_res.is_ok(), "Case service must be registered");
+
+    // Terminal service
+    let term_res = client.create_terminal_session("ts-01", "CASE-CFG-01", "investigator-01");
+    assert!(term_res.is_ok(), "Terminal service must be registered");
+
+    // Browser service
+    let browser_res =
+        client.create_browser_session("bs-01", "CASE-CFG-01", "investigator-01", "tor");
+    assert!(browser_res.is_ok(), "Browser service must be registered");
+
+    // Report service
+    let report_res = client.generate_report("CASE-CFG-01", "investigator-01", "json");
+    assert!(report_res.is_ok(), "Report service must be registered");
+}
+
+#[test]
+fn test_phase5_preset_file_consistency() {
+    let repo_root = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .unwrap()
+        .parent()
+        .unwrap()
+        .to_path_buf();
+
+    let preset_path = repo_root.join("build/systemd/pursue.preset");
+    assert!(preset_path.exists(), "pursue.preset must exist");
+
+    let content = fs::read_to_string(&preset_path).unwrap();
+
+    // Must enable runtime and desktop
+    assert!(content.contains("enable pursue-runtime.service"));
+    assert!(content.contains("enable pursue-desktop.service"));
+    assert!(content.contains("enable tor.service"));
+
+    // Must NOT enable non-existent terminal/browser services
+    assert!(
+        !content.contains("pursue-terminal.service"),
+        "preset must not reference non-existent pursue-terminal.service"
+    );
+    assert!(
+        !content.contains("pursue-browser.service"),
+        "preset must not reference non-existent pursue-browser.service"
+    );
 }

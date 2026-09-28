@@ -1,9 +1,10 @@
 # PURSUE OS Default Systemd Service Preset
 # Enables core platform daemons on installation/first-boot.
+# Architecture: single monolithic binary (Decision A-011).
+# Terminal and browser services run in-process within pursue-runtime.
 
 enable pursue-runtime.service
-enable pursue-terminal.service
-enable pursue-browser.service
+enable pursue-desktop.service
 enable tor.service
 enable nftables.service
 enable systemd-timesyncd.service
