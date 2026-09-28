@@ -40,8 +40,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Ensure directories exist, falling back to temp dir if unprivileged
     let (file_store, case_storage) = match fs::create_dir_all(&case_storage).and_then(|_| {
-        FileCaseStore::open(&case_storage)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e.to_string()))
+        FileCaseStore::open(&case_storage).map_err(|e| std::io::Error::other(e.to_string()))
     }) {
         Ok(store) => (Arc::new(Mutex::new(store)), case_storage),
         Err(e) => {
