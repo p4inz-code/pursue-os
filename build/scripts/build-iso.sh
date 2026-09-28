@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# PURSUE OS — Bootable Hybrid UEFI/BIOS Live ISO Packaging Script (Phase 1B)
+# PURSUE OS — Bootable Hybrid UEFI/BIOS Live ISO Packaging Script (Phase 1B + Phase 6)
 # Converts a prepared PURSUE rootfs directory into a bootable ISO image.
 #
 # Requirements:
@@ -14,6 +14,13 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 ROOTFS_DIR="${1:-${ROOT_DIR}/target/pursue-rootfs}"
 ISO_OUTPUT="${2:-${ROOT_DIR}/target/pursue-os-v1-amd64.iso}"
 WORK_DIR="${ROOT_DIR}/target/iso-work"
+
+cleanup() {
+    if [[ -d "${WORK_DIR}" ]]; then
+        rm -rf "${WORK_DIR}"
+    fi
+}
+trap cleanup EXIT
 
 echo "=========================================================="
 echo " PURSUE OS — Building Hybrid Live ISO"
@@ -35,26 +42,35 @@ if [[ ! -d "${ROOTFS_DIR}" ]]; then
     exit 1
 fi
 
+# Validate rootfs contains the PURSUE binary (Decision A-011)
+if [[ ! -f "${ROOTFS_DIR}/usr/lib/pursue/bin/pursue-desktop" ]]; then
+    echo "ERROR: pursue-desktop binary not found in rootfs at /usr/lib/pursue/bin/." >&2
+    echo "Ensure build-base.sh installed the binary correctly." >&2
+    exit 1
+fi
+
 rm -rf "${WORK_DIR}"
 mkdir -p "${WORK_DIR}/live"
 mkdir -p "${WORK_DIR}/boot/grub"
 
-echo "[1/4] Creating compressed SquashFS image..."
+echo "[1/5] Creating compressed SquashFS image..."
 mksquashfs "${ROOTFS_DIR}" "${WORK_DIR}/live/filesystem.squashfs" \
     -comp xz -b 1M -noappend
 
-echo "[2/4] Extracting kernel and initramfs..."
+echo "[2/5] Extracting kernel and initramfs..."
 VMLINUZ=$(find "${ROOTFS_DIR}/boot" -name 'vmlinuz*' | sort -V | tail -n 1)
 INITRD=$(find "${ROOTFS_DIR}/boot" -name 'initrd.img*' | sort -V | tail -n 1)
 
 if [[ -z "${VMLINUZ}" || -z "${INITRD}" ]]; then
-    echo "WARNING: Kernel or initrd not found in rootfs. Using fallback live structure."
-else
-    cp "${VMLINUZ}" "${WORK_DIR}/boot/vmlinuz"
-    cp "${INITRD}" "${WORK_DIR}/boot/initrd.img"
+    echo "ERROR: Kernel or initrd not found in rootfs /boot/." >&2
+    echo "Ensure linux-image-amd64 is installed in the rootfs." >&2
+    exit 1
 fi
 
-echo "[3/4] Generating GRUB EFI & BIOS boot configuration..."
+cp "${VMLINUZ}" "${WORK_DIR}/boot/vmlinuz"
+cp "${INITRD}" "${WORK_DIR}/boot/initrd.img"
+
+echo "[3/5] Generating GRUB EFI & BIOS boot configuration..."
 cat << 'EOF' > "${WORK_DIR}/boot/grub/grub.cfg"
 set default=0
 set timeout=5
@@ -70,7 +86,7 @@ menuentry "PURSUE OS — Safe Graphics / Failsafe Mode" {
 }
 EOF
 
-echo "[4/4] Assembling hybrid bootable ISO with xorriso..."
+echo "[4/5] Assembling hybrid bootable ISO with xorriso..."
 mkdir -p "$(dirname "${ISO_OUTPUT}")"
 xorriso -as mkisofs \
     -iso-level 3 \
@@ -79,8 +95,11 @@ xorriso -as mkisofs \
     -output "${ISO_OUTPUT}" \
     "${WORK_DIR}"
 
+echo "[5/5] Generating integrity checksum..."
+sha256sum "${ISO_OUTPUT}" > "${ISO_OUTPUT}.sha256"
+
 echo "=========================================================="
 echo " ISO Generated successfully: ${ISO_OUTPUT}"
-sha256sum "${ISO_OUTPUT}" > "${ISO_OUTPUT}.sha256"
-echo " SHA-256 Checksum written to ${ISO_OUTPUT}.sha256"
+echo " SHA-256 Checksum: $(cat "${ISO_OUTPUT}.sha256")"
+echo " Size: $(du -h "${ISO_OUTPUT}" | cut -f1)"
 echo "=========================================================="
