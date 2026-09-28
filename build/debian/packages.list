@@ -9,6 +9,7 @@ systemd-sysv
 udev
 dbus
 linux-image-amd64
+live-boot
 kmod
 sudo
 locales

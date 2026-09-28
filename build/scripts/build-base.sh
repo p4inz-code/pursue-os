@@ -102,12 +102,21 @@ chroot "${TARGET_DIR}" systemd-tmpfiles --create || true
 chroot "${TARGET_DIR}" systemctl preset-all || true
 
 echo "[6/6] Setting ownership & permissions..."
+mkdir -p "${TARGET_DIR}/home/pursue-investigator"
+chroot "${TARGET_DIR}" chown -R pursue-investigator:pursue-investigator /home/pursue-investigator || true
+chroot "${TARGET_DIR}" usermod -aG sudo,video,audio,input pursue-investigator || true
+chroot "${TARGET_DIR}" passwd -d pursue-investigator || true
+
 # Runtime directories (owned by pursue system daemon)
 chroot "${TARGET_DIR}" chown -R pursue:pursue-investigator /var/lib/pursue || true
 chroot "${TARGET_DIR}" chmod -R 0770 /var/lib/pursue/cases || true
 chroot "${TARGET_DIR}" chmod -R 0770 /var/lib/pursue/profiles || true
 chroot "${TARGET_DIR}" chmod -R 0770 /var/lib/pursue/reports || true
 chroot "${TARGET_DIR}" chown -R pursue:pursue-investigator /var/log/pursue || true
+mkdir -p "${TARGET_DIR}/run/pursue"
+chroot "${TARGET_DIR}" chown -R pursue:pursue-investigator /run/pursue || true
+chroot "${TARGET_DIR}" chmod 0770 /run/pursue || true
+
 
 echo "=========================================================="
 echo " Minimal Bootable Base assembly complete: ${TARGET_DIR}"

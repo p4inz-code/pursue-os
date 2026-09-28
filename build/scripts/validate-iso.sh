@@ -18,6 +18,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 ISO_PATH="${1:-${ROOT_DIR}/target/pursue-os-v1-amd64.iso}"
+if [[ -f "${ISO_PATH}" ]]; then
+    ISO_PATH="$(cd "$(dirname "${ISO_PATH}")" && pwd)/$(basename "${ISO_PATH}")"
+fi
 CHECKSUM_PATH="${ISO_PATH}.sha256"
 
 echo "=== PURSUE OS ISO Self-Check Validation ==="
@@ -59,7 +62,9 @@ fi
 echo "2. Checksum verification:"
 if [[ -f "${CHECKSUM_PATH}" ]]; then
     check "SHA-256 checksum file exists" "pass"
-    if cd "$(dirname "${ISO_PATH}")" && sha256sum -c "${CHECKSUM_PATH}" >/dev/null 2>&1; then
+    if sha256sum -c "${CHECKSUM_PATH}" >/dev/null 2>&1 || \
+       (cd "$(dirname "${ISO_PATH}")" && sha256sum -c "${CHECKSUM_PATH}" >/dev/null 2>&1) || \
+       (cd "$(dirname "${ISO_PATH}")" && sha256sum -c "$(basename "${CHECKSUM_PATH}")" >/dev/null 2>&1); then
         check "SHA-256 checksum matches" "pass"
     else
         check "SHA-256 checksum matches" "fail"

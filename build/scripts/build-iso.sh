@@ -13,7 +13,7 @@ ROOT_DIR="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 ROOTFS_DIR="${1:-${ROOT_DIR}/target/pursue-rootfs}"
 ISO_OUTPUT="${2:-${ROOT_DIR}/target/pursue-os-v1-amd64.iso}"
-WORK_DIR="${ROOT_DIR}/target/iso-work"
+WORK_DIR="${3:-/var/tmp/pursue-iso-work}"
 
 cleanup() {
     if [[ -d "${WORK_DIR}" ]]; then
@@ -72,28 +72,43 @@ cp "${INITRD}" "${WORK_DIR}/boot/initrd.img"
 
 echo "[3/5] Generating GRUB EFI & BIOS boot configuration..."
 cat << 'EOF' > "${WORK_DIR}/boot/grub/grub.cfg"
+serial --speed=115200 --unit=0 --word=8 --parity=no --stop=1
+terminal_input --append serial
+terminal_output --append serial
+
 set default=0
 set timeout=5
 
 menuentry "PURSUE OS — Forensic Investigation Workstation (Live RAM)" {
-    linux /boot/vmlinuz boot=live components quiet splash security=apparmor
+    linux /boot/vmlinuz boot=live components quiet splash security=apparmor console=ttyS0,115200 console=tty0
+    initrd /boot/initrd.img
+}
+
+menuentry "PURSUE OS — Forensic Workstation (Serial Console Debug)" {
+    linux /boot/vmlinuz boot=live components console=ttyS0,115200 console=tty0 systemd.journald.forward_to_console=1
     initrd /boot/initrd.img
 }
 
 menuentry "PURSUE OS — Safe Graphics / Failsafe Mode" {
-    linux /boot/vmlinuz boot=live components nomodeset noapic
+    linux /boot/vmlinuz boot=live components nomodeset noapic console=ttyS0,115200 console=tty0
     initrd /boot/initrd.img
 }
 EOF
 
-echo "[4/5] Assembling hybrid bootable ISO with xorriso..."
+echo "[4/5] Assembling hybrid bootable ISO..."
 mkdir -p "$(dirname "${ISO_OUTPUT}")"
-xorriso -as mkisofs \
-    -iso-level 3 \
-    -full-iso9660-filenames \
-    -volid "PURSUE_OS_V1" \
-    -output "${ISO_OUTPUT}" \
-    "${WORK_DIR}"
+if command -v grub-mkrescue >/dev/null 2>&1; then
+    echo "Using grub-mkrescue for hybrid UEFI/BIOS bootable media..."
+    grub-mkrescue -o "${ISO_OUTPUT}" "${WORK_DIR}" -- -volid "PURSUE_OS_V1"
+else
+    echo "Using xorriso mkisofs fallback..."
+    xorriso -as mkisofs \
+        -iso-level 3 \
+        -full-iso9660-filenames \
+        -volid "PURSUE_OS_V1" \
+        -output "${ISO_OUTPUT}" \
+        "${WORK_DIR}"
+fi
 
 echo "[5/5] Generating integrity checksum..."
 sha256sum "${ISO_OUTPUT}" > "${ISO_OUTPUT}.sha256"
