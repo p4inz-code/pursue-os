@@ -21,11 +21,17 @@ PrivateTmp=true
 ProtectKernelTunables=true
 ProtectKernelModules=true
 ProtectControlGroups=true
+ProtectClock=true
+ProtectHostname=true
 MemoryDenyWriteExecute=true
 RestrictRealtime=true
 RestrictNamespaces=true
+RestrictSUIDSGID=true
 LockPersonality=true
 NoNewPrivileges=true
+CapabilityBoundingSet=
+DevicePolicy=closed
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
 
 [Install]
 WantedBy=multi-user.target

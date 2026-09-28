@@ -38,7 +38,10 @@ command -v debootstrap >/dev/null 2>&1 || {
 }
 
 # Verify the cross-compiled PURSUE binary exists
-PURSUE_BINARY="${ROOT_DIR}/target/x86_64-unknown-linux-gnu/release/pursue-desktop"
+PURSUE_BINARY="${ROOT_DIR}/target/x86_64-unknown-linux-musl/release/pursue-desktop"
+if [[ ! -f "${PURSUE_BINARY}" ]]; then
+    PURSUE_BINARY="${ROOT_DIR}/target/x86_64-unknown-linux-gnu/release/pursue-desktop"
+fi
 if [[ ! -f "${PURSUE_BINARY}" ]]; then
     # Fall back to native release binary (for native Linux builds)
     PURSUE_BINARY="${ROOT_DIR}/target/release/pursue-desktop"

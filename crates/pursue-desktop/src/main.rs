@@ -80,7 +80,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     router.register(Box::new(case_handler))?;
 
     // 2. Report service
-    let report_handler = ReportHandler::new(file_store.clone());
+    let report_handler =
+        ReportHandler::new(file_store.clone()).with_allowed_export_root(report_storage.clone());
     router.register(Box::new(report_handler))?;
 
     // 3. Terminal service with case store attached
@@ -117,16 +118,20 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let _ = fs::set_permissions(socket_path, fs::Permissions::from_mode(0o770));
                 println!("Listening on IPC socket: {}", socket_path.display());
 
+                let router_shared = Arc::new(Mutex::new(router));
                 loop {
                     match listener.accept() {
                         Ok((stream, _addr)) => {
-                            if let Err(e) = pursue_runtime::ipc::transport::serve(
-                                &mut &stream,
-                                &mut &stream,
-                                &mut router,
-                            ) {
-                                eprintln!("IPC request handling error: {e}");
-                            }
+                            let router_clone = Arc::clone(&router_shared);
+                            std::thread::spawn(move || {
+                                if let Err(e) = pursue_runtime::ipc::transport::serve_shared(
+                                    &mut &stream,
+                                    &mut &stream,
+                                    router_clone,
+                                ) {
+                                    eprintln!("IPC connection ended: {e}");
+                                }
+                            });
                         }
                         Err(e) if e.kind() == std::io::ErrorKind::Interrupted => continue,
                         Err(e) => {

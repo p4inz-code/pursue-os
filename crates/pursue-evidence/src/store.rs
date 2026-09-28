@@ -193,7 +193,20 @@ impl FileStore {
         };
         let text = serde_json::to_string_pretty(&manifest)
             .map_err(|e| Error::InvalidInput(format!("manifest serialization failed: {e}")))?;
-        fs::write(self.dir.join("manifest.json"), text)?;
+        let manifest_path = self.dir.join("manifest.json");
+        let tmp_path = self.dir.join(format!(
+            ".manifest.json.tmp.{}.{}",
+            std::process::id(),
+            now_unix()
+        ));
+        {
+            use std::io::Write;
+            let mut file = fs::File::create(&tmp_path)?;
+            file.write_all(text.as_bytes())?;
+            file.flush()?;
+            file.sync_all()?;
+        }
+        fs::rename(&tmp_path, manifest_path)?;
         Ok(())
     }
 }
@@ -206,7 +219,23 @@ impl EvidenceStore for FileStore {
             .append(now_unix(), actor, ACTION_ACQUIRED, Some(address))?;
         // Blob first, manifest last: a crash in between leaves an orphan blob,
         // never a manifest pointing at missing data.
-        fs::write(Self::blob_path(&self.dir, &address), data)?;
+        let blob_path = Self::blob_path(&self.dir, &address);
+        if !blob_path.exists() {
+            let tmp_path = self.dir.join("blobs").join(format!(
+                ".{}.tmp.{}.{}",
+                address.to_hex(),
+                std::process::id(),
+                now_unix()
+            ));
+            {
+                use std::io::Write;
+                let mut file = fs::File::create(&tmp_path)?;
+                file.write_all(data)?;
+                file.flush()?;
+                file.sync_all()?;
+            }
+            fs::rename(&tmp_path, &blob_path)?;
+        }
         self.records.insert(address, record.clone());
         self.persist()?;
         Ok(record)

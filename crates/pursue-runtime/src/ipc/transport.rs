@@ -42,7 +42,7 @@ pub trait Transport: Send {
 }
 
 /// Writes an 8-byte little-endian length prefix followed by `payload`.
-fn write_frame<W: Write>(writer: &mut W, payload: &[u8]) -> io::Result<()> {
+pub fn write_frame<W: Write>(writer: &mut W, payload: &[u8]) -> io::Result<()> {
     writer.write_all(&(payload.len() as u64).to_le_bytes())?;
     writer.write_all(payload)?;
     writer.flush()
@@ -52,7 +52,7 @@ fn write_frame<W: Write>(writer: &mut W, payload: &[u8]) -> io::Result<()> {
 ///
 /// Frames larger than [`MAX_FRAME_LEN`] are rejected with
 /// [`Error::InvalidInput`] before any allocation.
-fn read_frame<R: Read>(reader: &mut R) -> Result<Vec<u8>> {
+pub fn read_frame<R: Read>(reader: &mut R) -> Result<Vec<u8>> {
     let mut len_buf = [0u8; 8];
     reader.read_exact(&mut len_buf)?;
     let len = u64::from_le_bytes(len_buf);
@@ -69,9 +69,8 @@ fn read_frame<R: Read>(reader: &mut R) -> Result<Vec<u8>> {
 /// Serves requests read from `reader`, dispatching through `router`, writing
 /// responses to `writer`, until the connection closes cleanly.
 ///
-/// One request/response exchange per connection is the contract for the
-/// foundation transports. A clean EOF returns `Ok`; a malformed frame returns
-/// [`Error::InvalidInput`] and aborts the serve loop.
+/// Multiple requests per connection are served until EOF. A clean EOF returns `Ok`;
+/// a malformed frame returns [`Error::InvalidInput`] and aborts the serve loop.
 pub fn serve<R: Read, W: Write>(mut reader: R, mut writer: W, router: &mut Router) -> Result<()> {
     loop {
         let payload = match read_frame(&mut reader) {
@@ -82,6 +81,37 @@ pub fn serve<R: Read, W: Write>(mut reader: R, mut writer: W, router: &mut Route
         let request: Request = serde_json::from_slice(&payload)
             .map_err(|e| Error::InvalidInput(format!("malformed request frame: {e}")))?;
         let response = router.handle(&request);
+        let out = serde_json::to_vec(&response)
+            .map_err(|e| Error::InvalidInput(format!("response serialization failed: {e}")))?;
+        write_frame(&mut writer, &out)?;
+    }
+}
+
+/// Serves requests read from `reader`, dispatching each through a shared [`Arc<Mutex<Router>>`],
+/// and writing responses to `writer`.
+///
+/// Unlike [`serve`], this acquires the router mutex only for the duration of
+/// each dispatch, allowing multiple concurrent worker threads to share the same
+/// backend router without holding locks across network I/O.
+pub fn serve_shared<R: Read, W: Write>(
+    mut reader: R,
+    mut writer: W,
+    router: Arc<Mutex<Router>>,
+) -> Result<()> {
+    loop {
+        let payload = match read_frame(&mut reader) {
+            Ok(payload) => payload,
+            Err(Error::Io(e)) if e.kind() == io::ErrorKind::UnexpectedEof => return Ok(()),
+            Err(e) => return Err(e),
+        };
+        let request: Request = serde_json::from_slice(&payload)
+            .map_err(|e| Error::InvalidInput(format!("malformed request frame: {e}")))?;
+        let response = {
+            let mut guard = router
+                .lock()
+                .map_err(|_| Error::ServiceFailure("router lock poisoned".into()))?;
+            guard.handle(&request)
+        };
         let out = serde_json::to_vec(&response)
             .map_err(|e| Error::InvalidInput(format!("response serialization failed: {e}")))?;
         write_frame(&mut writer, &out)?;

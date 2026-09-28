@@ -45,6 +45,11 @@ impl CaseId {
                 "case id exceeds maximum length {CASE_ID_MAX_LEN}"
             )));
         }
+        if id == "." || id == ".." || id.contains("..") {
+            return Err(Error::InvalidInput(format!(
+                "case id {id:?} is not allowed (path traversal guard)"
+            )));
+        }
         let valid = id
             .bytes()
             .all(|b| b.is_ascii_alphanumeric() || b == b'.' || b == b'_' || b == b'-');
@@ -113,6 +118,11 @@ mod tests {
             "a\nb",
             "café",
             "case\x00x",
+            ".",
+            "..",
+            "case..1",
+            "../case",
+            "case/..",
         ] {
             assert!(CaseId::new(id).is_err(), "expected {id:?} to be invalid");
         }

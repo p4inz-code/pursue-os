@@ -102,7 +102,23 @@ impl FileCaseStore {
         };
         let text = serde_json::to_string_pretty(&manifest)
             .map_err(|e| Error::InvalidInput(format!("case manifest serialization failed: {e}")))?;
-        fs::write(self.manifest_path(case.id())?, text)?;
+        let target_path = self.manifest_path(case.id())?;
+        let tmp_path = self.case_dir(case.id())?.join(format!(
+            ".case.json.tmp.{}.{}",
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .map(|d| d.as_secs())
+                .unwrap_or(0)
+        ));
+        {
+            use std::io::Write;
+            let mut file = fs::File::create(&tmp_path)?;
+            file.write_all(text.as_bytes())?;
+            file.flush()?;
+            file.sync_all()?;
+        }
+        fs::rename(&tmp_path, target_path)?;
         Ok(())
     }
 
@@ -529,21 +545,11 @@ mod tests {
     #[test]
     fn path_traversal_is_rejected() {
         let dir = temp_dir("traversal");
-        let mut store = FileCaseStore::open(&dir).unwrap();
-        let dotdot = CaseId::new("..").unwrap();
-        let dot = CaseId::new(".").unwrap();
-        assert!(matches!(
-            store.load_case(&dotdot).unwrap_err(),
-            Error::InvalidInput(_)
-        ));
-        assert!(matches!(
-            store.create_case(dotdot, "title", "alice").unwrap_err(),
-            Error::InvalidInput(_)
-        ));
-        assert!(matches!(
-            store.load_case(&dot).unwrap_err(),
-            Error::InvalidInput(_)
-        ));
+        let _store = FileCaseStore::open(&dir).unwrap();
+        assert!(CaseId::new("..").is_err());
+        assert!(CaseId::new(".").is_err());
+        assert!(CaseId::new("case/..").is_err());
+        assert!(CaseId::new("../case").is_err());
         // Nothing was written outside the cases directory.
         assert!(!dir.join("case.json").exists());
         cleanup(&dir);
