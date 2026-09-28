@@ -14,21 +14,27 @@ pub fn render(ui: &mut Ui, state: &mut DesktopState, client: &dyn IpcClient) {
 
     // Refresh telemetry on dashboard view
     if state.cases.is_empty() {
-        if let Ok(res) = client.call("case", "case.list", serde_json::json!({})) {
-            if let Some(arr) = res.as_array() {
-                state.cases = arr
-                    .iter()
-                    .filter_map(|val| {
-                        Some(crate::state::CaseSummary {
-                            id: val.get("id")?.as_str()?.to_string(),
-                            title: val.get("title")?.as_str()?.to_string(),
-                            created_by: val.get("created_by")?.as_str()?.to_string(),
-                            status: val.get("status")?.as_str()?.to_string(),
-                            evidence_count: val.get("evidence_count")?.as_u64()? as usize,
-                            audit_count: val.get("audit_events_count")?.as_u64()? as usize,
+        match client.call("case", "case.list", serde_json::json!({})) {
+            Ok(res) => {
+                state.ipc_online = true;
+                if let Some(arr) = res.as_array() {
+                    state.cases = arr
+                        .iter()
+                        .filter_map(|val| {
+                            Some(crate::state::CaseSummary {
+                                id: val.get("id")?.as_str()?.to_string(),
+                                title: val.get("title")?.as_str()?.to_string(),
+                                created_by: val.get("created_by")?.as_str()?.to_string(),
+                                status: val.get("status")?.as_str()?.to_string(),
+                                evidence_count: val.get("evidence_count")?.as_u64()? as usize,
+                                audit_count: val.get("audit_events_count")?.as_u64()? as usize,
+                            })
                         })
-                    })
-                    .collect();
+                        .collect();
+                }
+            }
+            Err(_) => {
+                state.ipc_online = false;
             }
         }
     }
@@ -97,12 +103,12 @@ pub fn render(ui: &mut Ui, state: &mut DesktopState, client: &dyn IpcClient) {
         ui.group(|ui| {
             ui.set_min_width(140.0);
             ui.label(RichText::new("IPC STATUS").size(11.0).color(Color32::GRAY));
-            ui.label(
-                RichText::new("ONLINE")
-                    .size(22.0)
-                    .strong()
-                    .color(Color32::from_rgb(80, 220, 120)),
-            );
+            let (status_text, color) = if state.ipc_online {
+                ("ONLINE", Color32::from_rgb(80, 220, 120))
+            } else {
+                ("OFFLINE", Color32::from_rgb(255, 80, 80))
+            };
+            ui.label(RichText::new(status_text).size(22.0).strong().color(color));
         });
     });
 

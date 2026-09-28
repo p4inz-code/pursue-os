@@ -149,7 +149,76 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    let client = RouterClient::new(Arc::new(Mutex::new(router)));
+    // In GUI mode, determine whether to connect to system daemon or run in-process
+    let force_standalone = args.iter().any(|a| a == "--standalone");
+    let custom_socket = args
+        .windows(2)
+        .find(|pair| pair[0] == "--socket")
+        .map(|pair| PathBuf::from(&pair[1]));
+
+    #[allow(unused_variables)]
+    let socket_path = custom_socket
+        .or_else(|| config.ipc_socket_path.clone())
+        .unwrap_or_else(|| PathBuf::from("/run/pursue/ipc.sock"));
+
+    let (client, endpoint_desc): (Box<dyn pursue_desktop::IpcClient>, String) = if !force_standalone
+    {
+        #[cfg(unix)]
+        {
+            use pursue_runtime::ipc::transport::unix_transport::UnixTransport;
+
+            // Attempt to connect to the backend daemon IPC socket with a brief retry window
+            let mut connected = false;
+            if socket_path.exists() {
+                if UnixTransport::connect(&socket_path).is_ok() {
+                    connected = true;
+                }
+            } else {
+                // Wait briefly (up to 2 seconds) in case pursue-runtime.service is starting up
+                for _ in 0..20 {
+                    if socket_path.exists() && UnixTransport::connect(&socket_path).is_ok() {
+                        connected = true;
+                        break;
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(100));
+                }
+            }
+
+            if connected {
+                println!(
+                    "Connected to PURSUE OS runtime daemon at {}",
+                    socket_path.display()
+                );
+                let endpoint = format!("Unix Socket ({})", socket_path.display());
+                (
+                    Box::new(pursue_desktop::SocketClient::new(socket_path)),
+                    endpoint,
+                )
+            } else {
+                eprintln!(
+                    "Note: Daemon IPC socket at {} not available; using in-process services.",
+                    socket_path.display()
+                );
+                (
+                    Box::new(RouterClient::new(Arc::new(Mutex::new(router)))),
+                    "In-Process Router (Fallback)".to_string(),
+                )
+            }
+        }
+        #[cfg(not(unix))]
+        {
+            (
+                Box::new(RouterClient::new(Arc::new(Mutex::new(router)))),
+                "In-Process Router".to_string(),
+            )
+        }
+    } else {
+        println!("Starting PURSUE OS Desktop Shell in standalone mode (in-process services).");
+        (
+            Box::new(RouterClient::new(Arc::new(Mutex::new(router)))),
+            "In-Process Router (Standalone)".to_string(),
+        )
+    };
 
     let native_options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
@@ -161,7 +230,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     eframe::run_native(
         "PURSUE OS",
         native_options,
-        Box::new(|_cc| Ok(Box::new(PursueDesktopApp::new(Box::new(client))))),
+        Box::new(move |_cc| {
+            let mut app = PursueDesktopApp::new(client);
+            app.state.ipc_endpoint_info = endpoint_desc;
+            Ok(Box::new(app))
+        }),
     )
     .map_err(|e| format!("Desktop shell launch error: {e}").into())
 }

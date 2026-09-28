@@ -286,6 +286,69 @@ impl IpcClient for RouterClient {
     }
 }
 
+/// An IPC client communicating across a local Unix domain socket with the PURSUE OS daemon.
+#[cfg(unix)]
+pub struct SocketClient {
+    socket_path: std::path::PathBuf,
+    next_id: AtomicU64,
+}
+
+#[cfg(unix)]
+impl SocketClient {
+    /// Creates a new socket client connecting to the given Unix domain socket path.
+    pub fn new(socket_path: impl Into<std::path::PathBuf>) -> Self {
+        Self {
+            socket_path: socket_path.into(),
+            next_id: AtomicU64::new(1),
+        }
+    }
+
+    /// Returns the socket path configured for this client.
+    pub fn socket_path(&self) -> &std::path::Path {
+        &self.socket_path
+    }
+}
+
+#[cfg(unix)]
+impl IpcClient for SocketClient {
+    fn call(&self, service: &str, method: &str, params: JsonValue) -> Result<JsonValue> {
+        use pursue_runtime::ipc::Transport;
+        use pursue_runtime::ipc::transport::unix_transport::UnixTransport;
+
+        let id = self.next_id.fetch_add(1, Ordering::SeqCst);
+        let s_id = ServiceId::new(service)?;
+        let m_name = MethodName::new(method)?;
+        let request = Request::new(id, s_id, m_name, params);
+
+        let mut transport = match UnixTransport::connect(&self.socket_path) {
+            Ok(t) => t,
+            Err(_) => {
+                // Short retry in case the socket was transiently busy
+                std::thread::sleep(std::time::Duration::from_millis(50));
+                UnixTransport::connect(&self.socket_path).map_err(|e| {
+                    Error::ServiceFailure(format!(
+                        "Failed to connect to IPC socket at {}: {e}",
+                        self.socket_path.display()
+                    ))
+                })?
+            }
+        };
+
+        let response = transport.round_trip(&request)?;
+        if let Some(err) = response.error {
+            return Err(Error::ServiceFailure(format!(
+                "IPC Error [{}]: {}",
+                err.code().as_str(),
+                err.message()
+            )));
+        }
+
+        response
+            .result
+            .ok_or_else(|| Error::ServiceFailure("empty response result from IPC service".into()))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

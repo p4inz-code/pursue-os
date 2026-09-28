@@ -144,6 +144,7 @@ pub fn render(ui: &mut Ui, state: &mut DesktopState, client: &dyn IpcClient) {
                                 .unwrap_or("");
                             let size = res.get("size_bytes").and_then(|v| v.as_u64()).unwrap_or(0);
                             state.report_last_hash = Some(hash.to_string());
+                            state.report_verify_path = dest.to_string();
                             state.set_info(format!(
                                 "Report safely exported to '{dest}' ({size} bytes). Hash: {hash}"
                             ));

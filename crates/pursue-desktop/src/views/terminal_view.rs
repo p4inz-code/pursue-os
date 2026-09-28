@@ -27,28 +27,51 @@ pub fn render(ui: &mut Ui, state: &mut DesktopState, client: &dyn IpcClient) {
             .unwrap_or("Not Initialized");
         ui.label(format!("Session: [{sess_str}]"));
 
-        if state.terminal_session_id.is_none()
-            && state.active_case.is_some()
-            && ui.button("Initialize Terminal Session").clicked()
-        {
-            let sid = format!("term-{}", std::process::id());
-            let cid = state.active_case.as_ref().unwrap().id.clone();
-            let actor = state.investigator_id.clone();
+        if state.terminal_session_id.is_none() {
+            if state.active_case.is_some() {
+                if ui.button("Initialize Terminal Session").clicked() {
+                    let ts = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map(|d| d.as_secs())
+                        .unwrap_or(0);
+                    let sid = format!("term-{}-{}", std::process::id(), ts);
+                    let cid = state.active_case.as_ref().unwrap().id.clone();
+                    let actor = state.investigator_id.clone();
 
-            match client.call(
-                "terminal",
-                "session.create",
-                serde_json::json!({
-                    "session_id": sid,
-                    "case_id": cid,
-                    "actor": actor,
-                }),
-            ) {
-                Ok(_) => {
-                    state.terminal_session_id = Some(sid);
-                    state.set_info("Terminal session established over IPC.");
+                    match client.call(
+                        "terminal",
+                        "session.create",
+                        serde_json::json!({
+                            "session_id": sid,
+                            "case_id": cid,
+                            "actor": actor,
+                        }),
+                    ) {
+                        Ok(_) => {
+                            state.terminal_session_id = Some(sid);
+                            state.set_info("Terminal session established over IPC.");
+                        }
+                        Err(e) => state.set_error(format!("Failed to start session: {e}")),
+                    }
                 }
-                Err(e) => state.set_error(format!("Failed to start session: {e}")),
+            } else {
+                ui.label(
+                    RichText::new(
+                        "Select an active case in the Cases tab to initialize terminal session.",
+                    )
+                    .color(Color32::from_rgb(255, 180, 80))
+                    .italics(),
+                );
+            }
+        } else if ui.button("Terminate Session").clicked() {
+            if let Some(sid) = state.terminal_session_id.clone() {
+                let _ = client.call(
+                    "terminal",
+                    "session.terminate",
+                    serde_json::json!({ "session_id": sid }),
+                );
+                state.terminal_session_id = None;
+                state.set_info("Terminal session terminated.");
             }
         }
     });
@@ -60,10 +83,17 @@ pub fn render(ui: &mut Ui, state: &mut DesktopState, client: &dyn IpcClient) {
     ui.group(|ui| {
         ui.horizontal(|ui| {
             ui.label("Executable:");
-            ui.text_edit_singleline(&mut state.terminal_program);
+            ui.add(
+                egui::TextEdit::singleline(&mut state.terminal_program)
+                    .hint_text("e.g. uname, whoami, dig, ip"),
+            );
 
             ui.label("Arguments:");
-            ui.add(egui::TextEdit::singleline(&mut state.terminal_args).desired_width(260.0));
+            ui.add(
+                egui::TextEdit::singleline(&mut state.terminal_args)
+                    .desired_width(260.0)
+                    .hint_text("e.g. -a, --help"),
+            );
 
             let can_run =
                 state.terminal_session_id.is_some() && !state.terminal_program.trim().is_empty();
@@ -133,7 +163,12 @@ pub fn render(ui: &mut Ui, state: &mut DesktopState, client: &dyn IpcClient) {
     });
 
     ui.add_space(8.0);
-    ui.label(RichText::new("Execution History & Evidence:").strong());
+    ui.horizontal(|ui| {
+        ui.label(RichText::new("Execution History & Evidence:").strong());
+        if !state.terminal_history.is_empty() && ui.button("Clear Console History").clicked() {
+            state.terminal_history.clear();
+        }
+    });
 
     let sid_opt = state.terminal_session_id.clone();
     let mut capture_info = None;

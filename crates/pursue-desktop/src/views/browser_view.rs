@@ -41,30 +41,53 @@ pub fn render(ui: &mut Ui, state: &mut DesktopState, client: &dyn IpcClient) {
             state.browser_session_id = None;
         }
 
-        if state.browser_session_id.is_none()
-            && state.active_case.is_some()
-            && ui.button("Start Browser Session").clicked()
-        {
-            let sid = format!("browser-{}", std::process::id());
-            let cid = state.active_case.as_ref().unwrap().id.clone();
-            let actor = state.investigator_id.clone();
-            let mode = state.browser_mode.clone();
+        if state.browser_session_id.is_none() {
+            if state.active_case.is_some() {
+                if ui.button("Start Browser Session").clicked() {
+                    let ts = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .map(|d| d.as_secs())
+                        .unwrap_or(0);
+                    let sid = format!("browser-{}-{}", std::process::id(), ts);
+                    let cid = state.active_case.as_ref().unwrap().id.clone();
+                    let actor = state.investigator_id.clone();
+                    let mode = state.browser_mode.clone();
 
-            match client.call(
-                "browser",
-                "browser.session.create",
-                serde_json::json!({
-                    "session_id": sid,
-                    "case_id": cid,
-                    "actor": actor,
-                    "mode": mode,
-                }),
-            ) {
-                Ok(_) => {
-                    state.browser_session_id = Some(sid);
-                    state.set_info(format!("Browser session started in {mode} mode."));
+                    match client.call(
+                        "browser",
+                        "browser.session.create",
+                        serde_json::json!({
+                            "session_id": sid,
+                            "case_id": cid,
+                            "actor": actor,
+                            "mode": mode,
+                        }),
+                    ) {
+                        Ok(_) => {
+                            state.browser_session_id = Some(sid);
+                            state.set_info(format!("Browser session started in {mode} mode."));
+                        }
+                        Err(e) => state.set_error(format!("Failed to create browser session: {e}")),
+                    }
                 }
-                Err(e) => state.set_error(format!("Failed to create browser session: {e}")),
+            } else {
+                ui.label(
+                    RichText::new(
+                        "Select an active case in the Cases tab to start browser session.",
+                    )
+                    .color(Color32::from_rgb(255, 180, 80))
+                    .italics(),
+                );
+            }
+        } else if ui.button("Terminate Session").clicked() {
+            if let Some(sid) = state.browser_session_id.clone() {
+                let _ = client.call(
+                    "browser",
+                    "browser.session.terminate",
+                    serde_json::json!({ "session_id": sid }),
+                );
+                state.browser_session_id = None;
+                state.set_info("Browser session terminated.");
             }
         }
     });
@@ -88,7 +111,11 @@ pub fn render(ui: &mut Ui, state: &mut DesktopState, client: &dyn IpcClient) {
     ui.group(|ui| {
         ui.horizontal(|ui| {
             ui.label("Target URL:");
-            ui.add(egui::TextEdit::singleline(&mut state.browser_url).desired_width(420.0));
+            ui.add(
+                egui::TextEdit::singleline(&mut state.browser_url)
+                    .desired_width(420.0)
+                    .hint_text("https://example.com or http://*.onion"),
+            );
 
             let can_navigate =
                 state.browser_session_id.is_some() && !state.browser_url.trim().is_empty();
@@ -152,7 +179,12 @@ pub fn render(ui: &mut Ui, state: &mut DesktopState, client: &dyn IpcClient) {
     });
 
     ui.add_space(8.0);
-    ui.label(RichText::new("Navigation History & Captured Artifacts:").strong());
+    ui.horizontal(|ui| {
+        ui.label(RichText::new("Navigation History & Captured Artifacts:").strong());
+        if !state.browser_history.is_empty() && ui.button("Clear History").clicked() {
+            state.browser_history.clear();
+        }
+    });
 
     let sid_opt = state.browser_session_id.clone();
     let mut capture_info = None;

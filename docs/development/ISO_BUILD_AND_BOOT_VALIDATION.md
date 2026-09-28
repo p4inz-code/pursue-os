@@ -168,3 +168,64 @@ Execution of `tests/qemu_verify_boot.py` against `de6c5bcb684d30c6df233a10ed1701
 | Full investigation flow | ✅ Live case, terminal, CAS capture, audit chain, export & verification PASSED |
 | Adversarial security suite | ✅ 19/19 adversarial attack tests PASSED |
 | Beta Readiness Gate | ✅ **PASS** |
+
+## Phase 9: V1 Beta Product Integration & First-Boot Readiness
+
+> Status: **VERIFIED & COMPLETE**
+> Scope: Sway session autostart, console autologin, IPC socket client, desktop UI polish, and ISO rebuild with full QEMU validation.
+
+### Session & First-Boot Configuration
+
+| Component | File | Deployment Path |
+|-----------|------|-----------------|
+| Sway autostart | `build/config/sway-config.d-pursue.conf` | `/etc/sway/config.d/00-pursue.conf` |
+| Console session launcher | `build/config/profile.d-pursue-session.sh` | `/etc/profile.d/00-pursue-session.sh` |
+| Getty autologin override | `build/config/getty-autologin.conf` | `/etc/systemd/system/getty@tty1.service.d/autologin.conf` |
+
+**Deterministic startup sequence:**
+
+```
+kernel → systemd → pursue-runtime.service → /run/pursue/ipc.sock
+       → getty@tty1 (autologin pursue-investigator) → /etc/profile.d/00-pursue-session.sh → sway
+       → /etc/sway/config.d/00-pursue.conf → pursue-desktop --config /etc/pursue/config.toml
+       → SocketClient connects to /run/pursue/ipc.sock → cases, terminal, browser, reports
+```
+
+### Desktop UI Enhancements
+
+- **SocketClient** (`crates/pursue-desktop/src/client.rs`): Unix domain socket IPC client with automatic retry (2s window for daemon startup).
+- **Dynamic investigator identity**: Reads `USER`/`LOGNAME` environment variable at startup; defaults to `investigator-01`.
+- **IPC health indicator**: Dashboard shows live IPC endpoint and online/offline status.
+- **Unique session IDs**: Terminal (`term-{pid}-{ts}`) and browser (`browser-{pid}-{ts}`) sessions.
+- **Session termination controls**: Explicit terminate buttons in terminal and browser views.
+- **Report auto-fill**: `report_verify_path` auto-populated upon successful export.
+- **Settings tab**: Displays active IPC endpoint with per-service health probes.
+
+### Updated ISO Artifacts
+
+| Artifact | Verified Value |
+|----------|----------------|
+| Live ISO Image | `target/pursue-os-v1-amd64.iso` (655,984,640 bytes / ~626 MB) |
+| SHA-256 Checksum | `10b3c00730e21d4ea757a28a539b377e816d5b7e63d369192b6a62aa91cedf38` |
+| Static Binary | `target/x86_64-unknown-linux-musl/release/pursue-desktop` (static-PIE ELF x86_64) |
+
+### QEMU Boot Validation (Phase 9 ISO)
+
+Execution of `tests/qemu_verify_boot.py` against Phase 9 ISO:
+
+| # | Check | Result | Status |
+|---|-------|--------|--------|
+| 1 | Kernel boot (serial `ttyS0`) | `6.12.107+deb13-amd64` | ✅ PASS |
+| 2 | Systemd multi-user | System running | ✅ PASS |
+| 3 | `pursue-runtime.service` | `active (running)`, PID 468 | ✅ PASS |
+| 4 | IPC socket | `/run/pursue/ipc.sock` mode `0770` `pursue:pursue-investigator` | ✅ PASS |
+| 5 | Service daemon account | `uid=990(pursue)` | ✅ PASS |
+| 6 | Investigator account | `uid=1001(pursue-investigator)` sudo,audio,video,input | ✅ PASS |
+| 7 | Passwordless console login | `pursue-investigator` logged in on `ttyS0` | ✅ PASS |
+| 8 | Tor service | `active (exited)` | ✅ PASS |
+| 9 | Headless CLI validation | `--headless` prints config, exits 0 | ✅ PASS |
+| 10 | Live investigation flow | 7/7 steps PASSED (case, terminal, evidence, audit, report, verify) | ✅ PASS |
+| 11 | Sway autostart config | `/etc/sway/config.d/00-pursue.conf` deployed | ✅ PASS |
+| 12 | Console autologin | `getty@tty1.service.d/autologin.conf` deployed | ✅ PASS |
+| 13 | Profile session launcher | `/etc/profile.d/00-pursue-session.sh` deployed | ✅ PASS |
+

@@ -251,6 +251,10 @@ pub struct DesktopState {
     pub status_message: Option<String>,
     /// Whether the status message represents an error.
     pub is_error: bool,
+    /// Active IPC endpoint information (e.g. Unix socket or in-process).
+    pub ipc_endpoint_info: String,
+    /// Whether backend IPC services are responding.
+    pub ipc_online: bool,
 }
 
 impl Default for DesktopState {
@@ -277,15 +281,15 @@ impl Default for DesktopState {
             case_timeline_items: Vec::new(),
 
             report_format: "html".to_string(),
-            report_export_path: "reports/investigation_report.html".to_string(),
+            report_export_path: "reports/investigation-report.html".to_string(),
             report_preview_content: None,
             report_last_hash: None,
-            report_verify_path: String::new(),
+            report_verify_path: "reports/investigation-report.html".to_string(),
             report_verify_result: None,
 
             terminal_session_id: None,
-            terminal_program: "echo".to_string(),
-            terminal_args: "PURSUE OS Terminal Active".to_string(),
+            terminal_program: String::new(),
+            terminal_args: String::new(),
             terminal_history: Vec::new(),
 
             browser_session_id: None,
@@ -295,6 +299,8 @@ impl Default for DesktopState {
 
             status_message: Some("Ready — IPC services connected".to_string()),
             is_error: false,
+            ipc_endpoint_info: "In-Process Router".to_string(),
+            ipc_online: true,
         }
     }
 }

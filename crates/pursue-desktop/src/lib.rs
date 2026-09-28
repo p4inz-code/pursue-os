@@ -14,5 +14,7 @@ pub mod state;
 pub mod views;
 
 pub use app::PursueDesktopApp;
+#[cfg(unix)]
+pub use client::SocketClient;
 pub use client::{IpcClient, RouterClient};
 pub use state::{DesktopState, DesktopTab};

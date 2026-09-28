@@ -92,6 +92,17 @@ cp "${BUILD_DIR}/config/tmpfiles.d-pursue.conf" "${TARGET_DIR}/usr/lib/tmpfiles.
 cp "${BUILD_DIR}/systemd/"*.service "${TARGET_DIR}/usr/lib/systemd/system/"
 cp "${BUILD_DIR}/systemd/pursue.preset" "${TARGET_DIR}/usr/lib/systemd/system-preset/90-pursue.preset"
 
+# Sway compositor autostart & session integration
+mkdir -p "${TARGET_DIR}/etc/sway/config.d"
+cp "${BUILD_DIR}/config/sway-config.d-pursue.conf" "${TARGET_DIR}/etc/sway/config.d/00-pursue.conf"
+mkdir -p "${TARGET_DIR}/etc/profile.d"
+cp "${BUILD_DIR}/config/profile.d-pursue-session.sh" "${TARGET_DIR}/etc/profile.d/00-pursue-session.sh"
+chmod 0755 "${TARGET_DIR}/etc/profile.d/00-pursue-session.sh"
+
+# Console autologin for pursue-investigator on tty1
+mkdir -p "${TARGET_DIR}/etc/systemd/system/getty@tty1.service.d"
+cp "${BUILD_DIR}/config/getty-autologin.conf" "${TARGET_DIR}/etc/systemd/system/getty@tty1.service.d/autologin.conf"
+
 echo "[4/6] Installing pursue-desktop binary (Decision A-011: single binary)..."
 cp "${PURSUE_BINARY}" "${TARGET_DIR}/usr/lib/pursue/bin/pursue-desktop"
 chmod 0755 "${TARGET_DIR}/usr/lib/pursue/bin/pursue-desktop"

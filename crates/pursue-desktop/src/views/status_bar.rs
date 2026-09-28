@@ -10,12 +10,29 @@ pub fn render(ui: &mut Ui, state: &DesktopState, _client: &dyn IpcClient) {
     ui.horizontal(|ui| {
         // System and User identity
         ui.label(
-            RichText::new("PURSUE OS v0.1.0")
+            RichText::new("PURSUE OS v1.0.0-beta")
                 .strong()
                 .color(Color32::from_rgb(180, 180, 200)),
         );
         ui.separator();
-        ui.label(RichText::new("User: pursue-analyst").color(Color32::from_rgb(150, 220, 150)));
+        ui.label(
+            RichText::new(format!("User: {}", state.investigator_id))
+                .color(Color32::from_rgb(150, 220, 150)),
+        );
+
+        ui.separator();
+
+        // IPC endpoint indicator
+        let ipc_color = if state.ipc_online {
+            Color32::from_rgb(120, 220, 120)
+        } else {
+            Color32::from_rgb(255, 100, 100)
+        };
+        ui.label(
+            RichText::new(format!("IPC: {}", state.ipc_endpoint_info))
+                .color(ipc_color)
+                .size(11.0),
+        );
 
         ui.separator();
 
@@ -47,7 +64,12 @@ pub fn render(ui: &mut Ui, state: &DesktopState, _client: &dyn IpcClient) {
 
         // Status message notification
         if let Some(msg) = &state.status_message {
-            ui.label(RichText::new(msg).color(Color32::from_rgb(255, 230, 100)));
+            let color = if state.is_error {
+                Color32::from_rgb(255, 100, 100)
+            } else {
+                Color32::from_rgb(255, 230, 100)
+            };
+            ui.label(RichText::new(msg).color(color));
         }
     });
 }

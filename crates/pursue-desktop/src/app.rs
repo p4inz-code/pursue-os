@@ -20,10 +20,13 @@ pub struct PursueDesktopApp {
 impl PursueDesktopApp {
     /// Creates a new desktop application instance with the given IPC client.
     pub fn new(client: Box<dyn IpcClient>) -> Self {
-        Self {
-            client,
-            state: DesktopState::new(),
+        let mut state = DesktopState::new();
+        if let Ok(user) = std::env::var("USER").or_else(|_| std::env::var("LOGNAME")) {
+            if !user.trim().is_empty() {
+                state.investigator_id = user.trim().to_string();
+            }
         }
+        Self { client, state }
     }
 
     /// Renders the top navigation header bar and tab selector.
@@ -106,8 +109,21 @@ impl PursueDesktopApp {
         ui.add_space(12.0);
 
         ui.group(|ui| {
-            ui.label(RichText::new("IPC Subsystem Health Check").strong());
-            if ui.button("Probe All IPC Handlers").clicked() {
+            ui.label(RichText::new("IPC Connection & Subsystem Health").strong());
+            ui.add_space(4.0);
+            ui.horizontal(|ui| {
+                ui.label("Active Endpoint:");
+                ui.label(RichText::new(&self.state.ipc_endpoint_info).monospace().strong());
+                let (status_text, status_color) = if self.state.ipc_online {
+                    ("ONLINE", Color32::from_rgb(80, 220, 120))
+                } else {
+                    ("OFFLINE", Color32::from_rgb(255, 80, 80))
+                };
+                ui.label(RichText::new(format!("[{status_text}]")).color(status_color).strong());
+            });
+
+            ui.add_space(6.0);
+            if ui.button("Run IPC Service Health Check").clicked() {
                 let case_probe = self.client.call("case", "case.list", serde_json::json!({}));
                 let report_probe = self.client.call("report", "report.preview_metadata", serde_json::json!({ "case_id": "probe" }));
                 let term_probe = self.client.call("terminal", "session.get", serde_json::json!({ "session_id": "probe" }));
@@ -127,9 +143,12 @@ impl PursueDesktopApp {
                     Ok(_) => true,
                 };
 
-                if case_ok && report_ok && term_ok && browser_ok {
+                let all_ok = case_ok && report_ok && term_ok && browser_ok;
+                self.state.ipc_online = all_ok;
+
+                if all_ok {
                     self.state
-                        .set_info("All backend IPC services (case, report, terminal, browser) verified and responsive.");
+                        .set_info("All backend IPC services (case, report, terminal, browser) verified responsive.");
                 } else {
                     self.state.set_error(format!(
                         "IPC Diagnostics: case={case_ok}, report={report_ok}, terminal={term_ok}, browser={browser_ok}"
