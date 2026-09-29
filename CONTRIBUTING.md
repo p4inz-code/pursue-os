@@ -8,10 +8,11 @@ PURSUE is an open-source investigation-focused operating system currently in act
 
 Please understand the project's current status:
 
-- Planning is complete.
-- The repository foundation is established.
-- Core implementation is beginning.
-- There is no stable public release yet.
+- Core V1 beta implementation is complete across all 10 phases.
+- Automated validation and QEMU cold-boot testing have passed.
+- Real-hardware testing and owner manual validation are currently in progress.
+- There is no stable public production release yet.
+
 
 Read the relevant documentation before making architectural changes.
 
