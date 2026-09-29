@@ -51,11 +51,13 @@ torsocks
 wayland-protocols
 libwayland-client0
 libwayland-server0
+mesa-vulkan-drivers
 sway
 swaylock
 swaybg
 pipewire
 pipewire-audio-client-libraries
+
 
 # Fonts & UI Support
 fonts-dejavu-core

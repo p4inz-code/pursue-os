@@ -84,16 +84,22 @@ menuentry "PURSUE OS — Forensic Investigation Workstation (Live RAM)" {
     initrd /boot/initrd.img
 }
 
+menuentry "PURSUE OS — Safe Graphics (NVIDIA / Software Fallback)" {
+    linux /boot/vmlinuz boot=live components modprobe.blacklist=nouveau nouveau.modeset=0 console=ttyS0,115200 console=tty0
+    initrd /boot/initrd.img
+}
+
 menuentry "PURSUE OS — Forensic Workstation (Serial Console Debug)" {
     linux /boot/vmlinuz boot=live components console=ttyS0,115200 console=tty0 systemd.journald.forward_to_console=1
     initrd /boot/initrd.img
 }
 
-menuentry "PURSUE OS — Safe Graphics / Failsafe Mode" {
+menuentry "PURSUE OS — Failsafe Mode (nomodeset, noapic)" {
     linux /boot/vmlinuz boot=live components nomodeset noapic console=ttyS0,115200 console=tty0
     initrd /boot/initrd.img
 }
 EOF
+
 
 echo "[4/5] Assembling hybrid bootable ISO..."
 mkdir -p "$(dirname "${ISO_OUTPUT}")"

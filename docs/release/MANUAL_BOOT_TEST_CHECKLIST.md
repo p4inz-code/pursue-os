@@ -1,9 +1,12 @@
 # PURSUE OS — V1 Beta Manual Boot Test Checklist
 
 > **Purpose:** Step-by-step validation checklist for the owner's first manual boot of the PURSUE OS V1 Beta ISO on real or virtual hardware.
-> **ISO:** `target/pursue-os-v1-amd64.iso` (Volume Label: `PURSUE_OS_V1`)
+> **ISO Path:** `target/pursue-os-v1-amd64.iso` (Volume Label: `PURSUE_OS_V1`)
+> **ISO Size:** 403,159,040 bytes (~385 MB)
+> **SHA-256 Checksum:** `749263f12c4375ccb4c9079dc05b8c73c4586c9ba971422ebd19d8331776184a`
 > **Architecture:** x86_64 (AMD64)
-> **Boot:** Hybrid BIOS + UEFI
+> **Boot Mode:** Hybrid BIOS + UEFI
+> **First Physical Test Machine:** College PC (NVIDIA RTX 5060 / RTX 5070 Ti)
 
 ---
 
@@ -11,7 +14,8 @@
 
 - A USB drive (≥ 1 GB) or virtual machine capable of booting ISO images
 - For USB: Flash with `dd`, Rufus (DD mode), or Ventoy
-- For VM: Attach ISO as boot media, allocate ≥ 1 GB RAM, 1+ CPU core
+- For VM: Attach ISO as boot media, allocate ≥ 2 GB RAM, 2+ CPU cores
+- **NVIDIA RTX Note:** On systems with very new NVIDIA GPUs (such as RTX 5060 / 5070 Ti), if the default boot entry fails modesetting, select `"PURSUE OS — Safe Graphics (NVIDIA / Software Fallback)"` from the GRUB menu.
 
 ---
 
@@ -21,9 +25,10 @@
 
 | # | Step | Expected Result | ✅/❌ |
 |---|------|----------------|-------|
-| 1 | Insert USB / attach ISO and power on | GRUB boot menu appears | |
+| 1 | Insert USB / attach ISO and power on | GRUB boot menu appears with normal and Safe Graphics options | |
 | 2 | Wait for automatic boot (5 second timeout) or press Enter | Kernel begins loading | |
 | 3 | Observe kernel messages on screen | `Linux pursue-os 6.12.x` kernel boots without panic | |
+
 
 ### Phase 2: Automatic Login & Desktop
 

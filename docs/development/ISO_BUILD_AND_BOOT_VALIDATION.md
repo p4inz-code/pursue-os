@@ -239,14 +239,15 @@ Execution of `tests/qemu_verify_boot.py` against Phase 9 ISO:
 | Artifact | Verified Value |
 |----------|----------------|
 | ISO Filename | `target/pursue-os-v1-amd64.iso` |
-| ISO Size | 655,984,640 bytes (~626 MB) |
-| SHA-256 Checksum | `365fdc9c237d46c03e0a76af09fbead6c14b938c0fcf56bbd2b1d5f669083752` |
+| ISO Size | 403,159,040 bytes (~385 MB) |
+| SHA-256 Checksum | `749263f12c4375ccb4c9079dc05b8c73c4586c9ba971422ebd19d8331776184a` |
 | Volume Label | `PURSUE_OS_V1` |
 | Architecture | x86_64 (AMD64) |
 | Boot Mode | Hybrid BIOS + UEFI |
 | Kernel | `6.12.107+deb13-amd64` |
 | Static Binary | `pursue-desktop` (static-PIE ELF x86_64, musl-linked) |
-| Git Commit | Phase 10 final |
+| Hardware Hardening | Sway `--unsupported-gpu`, `WLR_NO_HARDWARE_CURSORS=1`, `WLR_RENDERER_ALLOW_SOFTWARE=1`, Mesa Lavapipe, NVIDIA Fallback GRUB entry |
+
 
 ### QEMU Cold-Boot Validation (Phase 10 Final ISO)
 
