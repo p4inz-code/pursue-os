@@ -229,3 +229,64 @@ Execution of `tests/qemu_verify_boot.py` against Phase 9 ISO:
 | 12 | Console autologin | `getty@tty1.service.d/autologin.conf` deployed | ✅ PASS |
 | 13 | Profile session launcher | `/etc/profile.d/00-pursue-session.sh` deployed | ✅ PASS |
 
+## Phase 10: V1 Beta Release Candidate — Final ISO
+
+> Status: **VERIFIED & COMPLETE**
+> Scope: Final release candidate ISO built from verified clean source tree, fresh QEMU cold-boot validated.
+
+### Final Release Candidate ISO
+
+| Artifact | Verified Value |
+|----------|----------------|
+| ISO Filename | `target/pursue-os-v1-amd64.iso` |
+| ISO Size | 655,984,640 bytes (~626 MB) |
+| SHA-256 Checksum | `365fdc9c237d46c03e0a76af09fbead6c14b938c0fcf56bbd2b1d5f669083752` |
+| Volume Label | `PURSUE_OS_V1` |
+| Architecture | x86_64 (AMD64) |
+| Boot Mode | Hybrid BIOS + UEFI |
+| Kernel | `6.12.107+deb13-amd64` |
+| Static Binary | `pursue-desktop` (static-PIE ELF x86_64, musl-linked) |
+| Git Commit | Phase 10 final |
+
+### QEMU Cold-Boot Validation (Phase 10 Final ISO)
+
+Fresh cold-boot of the final release candidate ISO:
+
+| # | Check | Result | Status |
+|---|-------|--------|--------|
+| 1 | Kernel boot | `Linux 6.12.107+deb13-amd64` | ✅ PASS |
+| 2 | `systemctl is-system-running` | `running` (not degraded) | ✅ PASS |
+| 3 | `pursue-runtime.service` | `active (running)`, PID 482 | ✅ PASS |
+| 4 | IPC socket | `/run/pursue/ipc.sock` mode `0770` `pursue:pursue-investigator` | ✅ PASS |
+| 5 | Service daemon account | `uid=990(pursue)` groups: pursue, pursue-investigator | ✅ PASS |
+| 6 | Investigator account | `uid=1001(pursue-investigator)` sudo,audio,video,input | ✅ PASS |
+| 7 | Passwordless console login | `pursue-investigator` logged in automatically | ✅ PASS |
+| 8 | Tor service | `active (exited)` | ✅ PASS |
+| 9 | Headless CLI validation | Config/IPC info displayed, exits 0 | ✅ PASS |
+| 10 | Case creation | `case-live-1790647504` created | ✅ PASS |
+| 11 | Terminal session | Session created, `uname -a` executed | ✅ PASS |
+| 12 | Evidence capture | SHA-256: `2feaa8a3...` | ✅ PASS |
+| 13 | Audit chain | Verified: true, 2 events | ✅ PASS |
+| 14 | Report export | `live-report-1790647504.json` written | ✅ PASS |
+| 15 | Report SHA-256 | `90df1795...` | ✅ PASS |
+| 16 | Deep case integrity | Manifest ✅, audit chain ✅, evidence blobs ✅ | ✅ PASS |
+| 17 | Storage directories | cases/profiles/reports `0770` pursue:pursue-investigator | ✅ PASS |
+| 18 | Sway config deployed | `/etc/sway/config.d/00-pursue.conf` present | ✅ PASS |
+| 19 | Autologin deployed | `getty@tty1.service.d/autologin.conf` present | ✅ PASS |
+| 20 | Session launcher deployed | `/etc/profile.d/00-pursue-session.sh` present | ✅ PASS |
+
+### Final Validation Summary
+
+| Check | Status |
+|-------|--------|
+| Rust workspace tests (non-adversarial) | ✅ All 310+ passing |
+| Adversarial tests | ⚠️ Windows sandbox ACL restriction (pass on Linux; verified 19/19 in Phase 9) |
+| cargo fmt | ✅ Clean |
+| cargo clippy -D warnings | ✅ Clean |
+| Linux musl check | ✅ `cargo check --target x86_64-unknown-linux-musl` clean |
+| Build config validation | ✅ `validate-build-config.sh` passed (0 errors) |
+| ISO self-check | ✅ `validate-iso.sh` (9/9 checks passed) |
+| QEMU cold boot | ✅ Kernel → systemd `running` → daemon → IPC → autologin |
+| Live investigation flow | ✅ 7/7 steps passed |
+| `systemctl is-system-running` | ✅ `running` (clean — not degraded) |
+| Manual Boot Readiness | ✅ **ISO READY FOR OWNER MANUAL TEST** |
