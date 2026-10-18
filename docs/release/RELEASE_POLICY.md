@@ -1,12 +1,12 @@
-# PURSUE OS — Release Policy
+# PURSUE OS: release policy
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative release posture.
+> **Category:** A, Authoritative release posture.
 
 ## Current Status (locked)
 
-- **No stable public release exists.**
-- **No production ISO exists.**
+- No stable public release exists.
+- No production ISO exists.
 - README communicates: COMING SOON, active development, planning complete, repository foundation complete, implementation starting.
 - Do not create or claim a release until it genuinely exists.
 

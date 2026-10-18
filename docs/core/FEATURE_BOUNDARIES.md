@@ -1,12 +1,12 @@
-# PURSUE OS — Feature Boundaries
+# PURSUE OS: feature boundaries
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative project decisions.
+> **Category:** A, Authoritative project decisions.
 
 ## Flagship Features (V1 focus)
 
-1. **Investigation Terminal** — purpose-built command-line environment; mandatory for web scraping, information gathering, command-based investigation, OSINT tools, frameworks, automation under investigator control. Strong UX, syntax/error highlighting, optional AI assistance.
-2. **Investigation Browser** — secure, configurable research browsing with integrated Tor capabilities; multiple search engines; investigator-controlled network state.
+1. Investigation Terminal: purpose-built command-line environment; mandatory for web scraping, information gathering, command-based investigation, OSINT tools, frameworks, automation under investigator control. Strong UX, syntax/error highlighting, optional AI assistance.
+2. Investigation Browser: secure, configurable research browsing with integrated Tor capabilities; multiple search engines; investigator-controlled network state.
 
 ## Core Platform (V1 foundations)
 
@@ -15,7 +15,7 @@
 - Investigation graphs and timelines.
 - Reporting and export (ZIP, JSON; provenance/integrity preserved).
 - Secure storage and privilege separation.
-- Plugin foundation (extensible; ~5–7 curated tools per use case).
+- Plugin foundation (extensible; ~5-7 curated tools per use case).
 - Optional local AI assistance (assistant only; non-AI mode; no external APIs).
 - Modular tool integration (integrate existing tools; official tools where necessary).
 
@@ -23,7 +23,7 @@
 
 OSINT, SOCMINT, GEOINT, CTI, DFIR, infrastructure intelligence, media analysis, secure research.
 
-## Deferred / Later Phases
+## Deferred / later phases
 
 - Full terminal and full browser implementations (foundations first).
 - Tor integration in detail (dedicated major phase, together with the terminal).

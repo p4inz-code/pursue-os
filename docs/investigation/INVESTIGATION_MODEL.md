@@ -1,9 +1,9 @@
-# PURSUE OS — Investigation Model
+# PURSUE OS: investigation model
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative investigation requirements.
+> **Category:** A, Authoritative investigation requirements.
 
-## The Workflow
+## The workflow
 
 PURSUE treats investigation as a workflow, not a collection of tools. From the README: investigators should be able to **research, collect, analyze, connect, preserve, and report** information from one system.
 
@@ -31,9 +31,9 @@ PURSUE treats investigation as a workflow, not a collection of tools. From the R
 - plugins
 - optional AI assistance
 
-## Flagship Interfaces
+## Flagship interfaces
 
-The **Investigation Terminal** (command-based investigation, web scraping, information gathering, OSINT tools, frameworks, automation under investigator control) and the **Investigation Browser** (secure research browsing, Tor workflows, multiple search engines) form the major investigation interface layer.
+The **Investigation Terminal** (command-based investigation, web scraping, information gathering, OSINT tools, frameworks, automation under investigator control) and the Investigation Browser (secure research browsing, Tor workflows, multiple search engines) form the major investigation interface layer.
 
 ## Principles
 

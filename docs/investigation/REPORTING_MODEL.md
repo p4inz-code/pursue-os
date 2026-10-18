@@ -1,13 +1,13 @@
-# PURSUE OS — Reporting Model
+# PURSUE OS: reporting model
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative reporting requirements.
+> **Category:** A, Authoritative reporting requirements.
 
-## Locked Requirements
+## Locked requirements
 
-- PURSUE supports **professional reporting**.
-- **Multiple report formats** and **export options**: ZIP, JSON, protected/obfuscated code or similar where appropriate, secure export, investigation-friendly outputs.
-- **Reporting must preserve provenance and evidence integrity.**
+- PURSUE supports professional reporting.
+- Multiple report formats and export options: ZIP, JSON, protected/obfuscated code or similar where appropriate, secure export, investigation-friendly outputs.
+- Reporting must preserve provenance and evidence integrity.
 - Do not overengineer V1 without need.
 
 ## Principles

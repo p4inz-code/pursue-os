@@ -1,13 +1,13 @@
-# PURSUE OS — Source Model
+# PURSUE OS: source model
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative source requirements.
+> **Category:** A, Authoritative source requirements.
 
-## Locked Requirements
+## Locked requirements
 
-- Cases support **sources** — the origins of information.
-- **Provenance connects information to its source**; provenance is foundational.
-- **AI must not silently mutate source information** (sources remain investigator-controlled).
+- Cases support sources: the origins of information.
+- Provenance connects information to its source; provenance is foundational.
+- AI must not silently mutate source information (sources remain investigator-controlled).
 - Investigation spans many source types: web, social media (SOCMINT), geospatial (GEOINT), infrastructure, media, threat intelligence (CTI), and DFIR artifacts.
 
 ## Principles

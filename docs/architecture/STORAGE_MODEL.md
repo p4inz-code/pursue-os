@@ -1,14 +1,14 @@
-# PURSUE OS — Storage Model
+# PURSUE OS: storage model
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A/B — storage *principles* are handoff-locked; storage *technology* is implementation-defined.
+> **Category:** A/B, storage *principles* are handoff-locked; storage *technology* is implementation-defined.
 
 ## Storage Principles (locked)
 
-- **Evidence is the immutable source of truth.** Evidence storage must preserve integrity.
-- **Secure storage** is a named security architecture area.
-- **Case isolation** is a named security architecture area — cases must be kept separate.
-- **Provenance** must be preserved with stored evidence.
+- Evidence is the immutable source of truth. Evidence storage must preserve integrity.
+- Secure storage is a named security architecture area.
+- Case isolation is a named security architecture area, cases must be kept separate.
+- Provenance must be preserved with stored evidence.
 - Evidence integrity is verifiable; tampering must be detectable.
 
 ## Storage Areas (locked)

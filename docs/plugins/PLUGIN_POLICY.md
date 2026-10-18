@@ -1,14 +1,14 @@
-# PURSUE OS — Plugin Policy
+# PURSUE OS: plugin policy
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative plugin policy.
+> **Category:** A, Authoritative plugin policy.
 
-## Locked Policy
+## Locked policy
 
-- **V1:** strong plugin foundation; users can extend later; roughly 5–7 useful tools per use case initially; users can add more later; advanced customization introduced later.
-- **V2:** stronger plugin system; additional official modules; downloadable advanced modules; future plugins can be posted publicly / on GitHub.
+- V1: strong plugin foundation; users can extend later; roughly 5-7 useful tools per use case initially; users can add more later; advanced customization introduced later.
+- V2: stronger plugin system; additional official modules; downloadable advanced modules; future plugins can be posted publicly / on GitHub.
 - The foundation must be designed now so V2 does not require rebuilding everything (see PLUGIN_ARCHITECTURE.md).
-- **Plugin isolation** is a security requirement: plugins must not compromise the platform or silently alter evidence.
+- Plugin isolation is a security requirement: plugins must not compromise the platform or silently alter evidence.
 - AI boundaries apply within plugins as everywhere else.
 
 ## Distribution

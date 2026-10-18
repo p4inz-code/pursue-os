@@ -1,6 +1,6 @@
-# PURSUE OS — Forensic Reporting & Safe Export Foundation (Phase 4)
+# PURSUE OS: forensic reporting & safe export foundation (phase 4)
 
-**Phase**: 4 — Forensic Reporting & Safe Export Foundation  
+**Phase**: 4, Forensic Reporting & Safe Export Foundation  
 **Primary Crates**: `crates/pursue-report`, `crates/pursue-desktop`  
 **Status**: Implemented & Verified  
 
@@ -10,17 +10,17 @@
 
 The PURSUE OS Reporting Foundation provides cryptographically verifiable, deterministic forensic investigation reports. It allows investigators to synthesize case evidence, chronological timeline milestones, and chain-of-custody audit logs into standardized report packages suitable for legal proceedings, peer review, and intelligence dissemination.
 
-### Key Invariants
-1. **Deterministic Representation**: Identical case contents yield bit-for-bit identical report structures and cryptographic SHA-256 digests.
-2. **Self-Contained Printable HTML**: Generated HTML reports contain zero external dependencies (no external JS, no external stylesheets, no web fonts, no third-party CDNs). They are fully self-contained, responsive, and include `@media print` rules for paper and PDF printing.
-3. **Cryptographic Sealing**: Reports carry an embedded SHA-256 digest computed over the canonical representation of the report. Any tampering with metadata, evidence descriptions, or timeline items invalidates the cryptographic seal.
-4. **Path Traversal Protection**: Export destinations are strictly sanitized. Directory traversal attempts (`..`), null bytes, and writes outside authorized directories are rejected fail-closed.
-5. **Atomic File Writes**: Reports are written to temporary files and atomically renamed to prevent incomplete or corrupted files on disk.
-6. **Secret Scrubbing**: Sensitive strings (such as bearer tokens, API credentials, authorization headers) are automatically scrubbed from free-text fields before report compilation.
+### Key invariants
+1. Deterministic Representation: Identical case contents yield bit-for-bit identical report structures and cryptographic SHA-256 digests.
+2. Self-Contained Printable HTML: Generated HTML reports contain zero external dependencies (no external JS, no external stylesheets, no web fonts, no third-party CDNs). They are fully self-contained, responsive, and include `@media print` rules for paper and PDF printing.
+3. Cryptographic Sealing: Reports carry an embedded SHA-256 digest computed over the canonical representation of the report. Any tampering with metadata, evidence descriptions, or timeline items invalidates the cryptographic seal.
+4. Path Traversal Protection: Export destinations are strictly sanitized. Directory traversal attempts (`..`), null bytes, and writes outside authorized directories are rejected fail-closed.
+5. Atomic File Writes: Reports are written to temporary files and atomically renamed to prevent incomplete or corrupted files on disk.
+6. Secret Scrubbing: Sensitive strings (such as bearer tokens, API credentials, authorization headers) are automatically scrubbed from free-text fields before report compilation.
 
 ---
 
-## 2. Core Domain Models (`pursue-report::model`)
+## 2. Core domain models (`pursue-report::model`)
 
 - [`InvestigationReport`]: Top-level report container holding metadata, audit summary, evidence items, timeline items, and the embedded `report_hash`.
   - `compute_canonical_hash(&self) -> String`: Computes the SHA-256 digest of the canonical JSON structure with `report_hash: None`.
@@ -33,24 +33,24 @@ The PURSUE OS Reporting Foundation provides cryptographically verifiable, determ
 
 ---
 
-## 3. Report Formats & Rendering (`pursue-report::generator`)
+## 3. Report formats & rendering (`pursue-report::generator`)
 
 ### 3.1 Deterministic JSON (`render_json`)
 Outputs canonical, pretty-printed JSON structure preserving exact field ordering, numerical precisions, and embedded cryptographic digests.
 
-### 3.2 Standalone Forensic HTML (`render_html`)
+### 3.2 Standalone forensic HTML (`render_html`)
 Outputs a standalone HTML5 document featuring:
-- **PURSUE OS Forensic Header**: Case title, status pill badge, case identifier, generator identity, and generation timestamp.
-- **Cryptographic Integrity Seal**: SHA-256 canonical digest box, audit log provenance verification badge (`[VERIFIED INTACT]`), total audit count, and chain head hash.
-- **Case Details & Notes**: Creator identity, creation timestamp, attached evidence count, and escaped investigator notes.
-- **Evidence Inventory Table**: Content address (SHA-256), payload size, acquisition timestamp, provenance source, verification badge, and embedded preview box.
-- **Chronological Timeline Table**: Milestone sequence, timestamp, category badge, actor, title, and summary.
-- **Forensic Footer**: Cryptographic seal summary.
-- **Print Optimization**: Embedded `@media print` CSS rules guaranteeing clear page breaks and high-contrast rendering for paper and PDF export.
+- PURSUE OS Forensic Header: Case title, status pill badge, case identifier, generator identity, and generation timestamp.
+- Cryptographic Integrity Seal: SHA-256 canonical digest box, audit log provenance verification badge (`[VERIFIED INTACT]`), total audit count, and chain head hash.
+- Case Details & Notes: Creator identity, creation timestamp, attached evidence count, and escaped investigator notes.
+- Evidence Inventory Table: Content address (SHA-256), payload size, acquisition timestamp, provenance source, verification badge, and embedded preview box.
+- Chronological Timeline Table: Milestone sequence, timestamp, category badge, actor, title, and summary.
+- Forensic Footer: Cryptographic seal summary.
+- Print Optimization: Embedded `@media print` CSS rules guaranteeing clear page breaks and high-contrast rendering for paper and PDF export.
 
 ---
 
-## 4. Export Safety & Integrity (`pursue-report::export`)
+## 4. Export safety & integrity (`pursue-report::export`)
 
 - [`validate_export_path`]: Validates target paths against path traversal attacks. Rejects null bytes (`\0`), parent directory components (`..`), and optionally validates that the canonical target parent resides within an allowed export directory.
 - [`scrub_secrets`]: Detects and redacts credential tokens (`bearer ...`, `token=...`, `password=...`, `secret=...`) from free-form text inputs.
@@ -58,7 +58,7 @@ Outputs a standalone HTML5 document featuring:
 
 ---
 
-## 5. Report IPC Service: `report`
+## 5. Report IPC service: `report`
 
 Registered on the IPC router via [`pursue_report::ReportHandler`].
 
@@ -71,7 +71,7 @@ Registered on the IPC router via [`pursue_report::ReportHandler`].
 
 ---
 
-## 6. Verification & Test Coverage
+## 6. Verification & test coverage
 
 Verified across:
 1. `crates/pursue-report`: 5 unit and integration tests covering determinism, HTML self-containment, path traversal rejection, secret scrubbing, and IPC service workflows.

@@ -1,16 +1,16 @@
-# PURSUE OS — Browser & Tor Foundation (Phase 1F Specification)
+# PURSUE OS: browser & Tor foundation (phase 1F specification)
 
-> **Category:** B — Implementation documentation (maintained with the code).  
+> **Category:** B, Implementation documentation (maintained with the code).  
 > **Status:** Fully implemented and verified in Phase 1F (262/262 workspace tests passing, clippy clean, Linux cross-compile clean).  
 > **Scope:** Phase 1F Investigation Browser and Tor Foundation: browser session management, profile isolation, routing modes (Direct vs. Tor), fail-closed network boundaries, navigation validation, web evidence capture orchestration, runtime service integration, and IPC boundary.
 
 ---
 
-## 1. Investigation Browser Purpose
+## 1. Investigation browser purpose
 
 The **Investigation Browser** is one of the two flagship interface pillars of PURSUE OS (the other being the Investigation Terminal; see `docs/core/MASTER_SPEC.md` §4 and `docs/core/PURSUE_V1_CONTRACT.md` §2, §4).
 
-### Why It Exists
+### Why it exists
 Digital investigations across OSINT, SOCMINT, GEOINT, CTI, and DFIR require intensive web research. In generic operating systems:
 - Browsing history, cookies, and cached data leak across unrelated cases.
 - Captured web pages, raw HTML, and screenshots lack verifiable cryptographic provenance.
@@ -26,7 +26,7 @@ PURSUE OS elevates the browser to an integrated, forensic investigation instrume
 
 ---
 
-## 2. Browser Architecture
+## 2. Browser architecture
 
 Phase 1F builds the headless foundation in a new workspace crate: `crates/pursue-browser`.
 
@@ -39,14 +39,14 @@ crates/pursue-browser
 ```
 
 The browser foundation acts as the engine and supervisory controller for research browsing:
-1. **Data Models:** Validated `BrowserSessionId`, `BrowserSession`, `RoutingMode`, `NavigationRequest`, `NavigationResult`, `WebArtifact`.
-2. **Engine Abstraction:** Trait-based `BrowserEngine` supporting deterministic mock execution (`MockBrowserEngine`) and live network execution (`NetworkEngine`).
-3. **Evidence Capture:** `WebEvidenceCapturer` converting web artifacts into `EvidenceRecord` blobs in `FileStore` and attaching them to `Case`.
-4. **Service & IPC:** `BrowserService` implementing `pursue_runtime::service::Service` and `BrowserHandler` implementing `pursue_runtime::ipc::dispatch::Handler`.
+1. Data Models: Validated `BrowserSessionId`, `BrowserSession`, `RoutingMode`, `NavigationRequest`, `NavigationResult`, `WebArtifact`.
+2. Engine Abstraction: Trait-based `BrowserEngine` supporting deterministic mock execution (`MockBrowserEngine`) and live network execution (`NetworkEngine`).
+3. Evidence Capture: `WebEvidenceCapturer` converting web artifacts into `EvidenceRecord` blobs in `FileStore` and attaching them to `Case`.
+4. Service & IPC: `BrowserService` implementing `pursue_runtime::service::Service` and `BrowserHandler` implementing `pursue_runtime::ipc::dispatch::Handler`.
 
 ---
 
-## 3. Tor Integration Boundary
+## 3. Tor integration boundary
 
 Tor provides onion routing to obscure transport-layer IP addresses and route to `.onion` hidden services. In PURSUE OS:
 - Tor is an integrated platform subsystem accessed via a local SOCKS5 proxy (default `127.0.0.1:9050`) or local Tor control interface.
@@ -55,24 +55,24 @@ Tor provides onion routing to obscure transport-layer IP addresses and route to 
 
 ---
 
-## 4. Network Isolation Model
+## 4. Network isolation model
 
 Network routing is modeled as a strictly verified invariant:
-- **`RoutingMode::Direct`**: Requests are routed directly across standard network interfaces. Tor proxying is NOT invoked.
-- **`RoutingMode::Tor`**: Requests MUST route through the configured Tor proxy. If Tor is not running, proxy connection fails, or configuration is invalid, the engine **FAILS CLOSED**.
+- `RoutingMode::Direct`: Requests are routed directly across standard network interfaces. Tor proxying is NOT invoked.
+- `RoutingMode::Tor`: Requests MUST route through the configured Tor proxy. If Tor is not running, proxy connection fails, or configuration is invalid, the engine FAILS CLOSED.
 
 ---
 
-## 5. User-Controlled Tor Behavior & No Silent Fallbacks
+## 5. User-Controlled Tor behavior & no silent fallbacks
 
 PURSUE OS enforces the following cardinal rules:
-1. **No Silent Fallback to Direct:** If an investigator requests `RoutingMode::Tor` and Tor is down or unreachable, the system MUST NOT silently retry over the direct connection. It must abort and report an explicit routing failure error.
-2. **No Silent Fallback to Tor:** If an investigator requests `RoutingMode::Direct`, the system MUST NOT silently route through Tor, ensuring the investigator retains complete comprehension and control over their external network footprint.
-3. **Observable State:** Every navigation result and evidence capture record explicitly registers the active `RoutingMode`.
+1. No Silent Fallback to Direct: If an investigator requests `RoutingMode::Tor` and Tor is down or unreachable, the system MUST NOT silently retry over the direct connection. It must abort and report an explicit routing failure error.
+2. No Silent Fallback to Tor: If an investigator requests `RoutingMode::Direct`, the system MUST NOT silently route through Tor, ensuring the investigator retains complete comprehension and control over their external network footprint.
+3. Observable State: Every navigation result and evidence capture record explicitly registers the active `RoutingMode`.
 
 ---
 
-## 6. Browser Profile Isolation
+## 6. Browser profile isolation
 
 Profile contamination between cases or sessions compromises forensic integrity and operational security.
 - Every `BrowserSession` operates in an isolated filesystem profile directory:
@@ -83,7 +83,7 @@ Profile contamination between cases or sessions compromises forensic integrity a
 
 ---
 
-## 7. Case Association
+## 7. Case association
 
 - A `BrowserSession` can only be created by specifying a valid, existing `CaseId`.
 - The session lifecycle and all evidence generated are irrevocably tied to that case.
@@ -91,7 +91,7 @@ Profile contamination between cases or sessions compromises forensic integrity a
 
 ---
 
-## 8. Evidence Capture
+## 8. Evidence capture
 
 When the investigator captures a web page or resource:
 1. The raw payload bytes (HTML body, downloaded file, or screenshot image data) are extracted.
@@ -103,7 +103,7 @@ When the investigator captures a web page or resource:
 
 ---
 
-## 9. Provenance Model
+## 9. Provenance model
 
 Every captured web artifact links:
 - `timestamp_unix`: Time of capture.
@@ -112,32 +112,32 @@ Every captured web artifact links:
 - `case_id`: The owning case.
 - `address`: The SHA-256 digest of the raw content.
 
-### Evidentiary Truth Boundary
+### Evidentiary truth boundary
 The cryptographic hash guarantees that *what the browser received at the moment of capture* has not been tampered with since collection. **It does NOT prove that the remote web server or website content is objective real-world truth.**
 
 ---
 
-## 10. Screenshots, Page Artifacts, and Downloads
+## 10. Screenshots, page artifacts, and downloads
 
 The browser foundation supports capturing distinct artifact categories:
-- **`PageContent`**: Raw HTTP response body (HTML, JSON, XML, text).
-- **`HttpHeaders`**: Canonicalized HTTP headers (excluding sensitive authentication credentials).
-- **`Screenshot`**: Visual raster capture (PNG/JPEG) of rendered content.
-- **`DownloadedFile`**: Raw binary streams downloaded during session research.
+- `PageContent`: Raw HTTP response body (HTML, JSON, XML, text).
+- `HttpHeaders`: Canonicalized HTTP headers (excluding sensitive authentication credentials).
+- `Screenshot`: Visual raster capture (PNG/JPEG) of rendered content.
+- `DownloadedFile`: Raw binary streams downloaded during session research.
 
 ---
 
-## 11. URL Handling & Security
+## 11. URL handling & security
 
 Input URLs are untrusted user/network inputs. Validation rules:
-- **Permitted Schemes:** `http://` and `https://` only.
-- **Forbidden Schemes:** `file://`, `data:`, `javascript:`, `vbscript:`, `blob:`, `about:`, `chrome:`, `gopher:`, `ftp:`. Any attempt to navigate to a forbidden scheme is rejected with `Error::InvalidInput`.
-- **Format Validation:** URLs must parse valid authority/host and path structures without NUL bytes or unencoded control characters.
-- **Path Traversal & SSRF Defense:** Local file access via the browser navigation layer is strictly forbidden.
+- Permitted Schemes: `http://` and `https://` only.
+- Forbidden Schemes: `file://`, `data:`, `javascript:`, `vbscript:`, `blob:`, `about:`, `chrome:`, `gopher:`, `ftp:`. Any attempt to navigate to a forbidden scheme is rejected with `Error::InvalidInput`.
+- Format Validation: URLs must parse valid authority/host and path structures without NUL bytes or unencoded control characters.
+- Path Traversal & SSRF Defense: Local file access via the browser navigation layer is strictly forbidden.
 
 ---
 
-## 12. HTTP & Network Metadata Handling
+## 12. HTTP & network metadata handling
 
 - Metadata includes HTTP status code, response headers, content type, elapsed request duration, and server IP (when available and permitted by routing mode).
 - Headers are preserved in canonical order for evidentiary consistency.
@@ -145,7 +145,7 @@ Input URLs are untrusted user/network inputs. Validation rules:
 
 ---
 
-## 13. DNS Considerations & Leak Prevention
+## 13. DNS considerations & leak prevention
 
 - In `RoutingMode::Direct`, DNS resolution occurs via system resolvers.
 - In `RoutingMode::Tor`, DNS resolution MUST be performed remotely through the SOCKS5 proxy (`SOCKS5h` protocol), ensuring local DNS queries do NOT leak the destination host to local network observers or ISPs.
@@ -153,7 +153,7 @@ Input URLs are untrusted user/network inputs. Validation rules:
 
 ---
 
-## 14. Cookies & Session Storage
+## 14. Cookies & session storage
 
 - Cookies and session storage are confined strictly to the session's isolated profile.
 - By default, session cookies and authorization tokens are NOT written to evidence records.
@@ -161,26 +161,26 @@ Input URLs are untrusted user/network inputs. Validation rules:
 
 ---
 
-## 15. Credential & Secret Handling
+## 15. Credential & secret handling
 
 - Passwords, `Authorization` headers, `Cookie` headers containing session tokens, and proxy credentials MUST be scrubbed from default provenance labels and logs.
 - The `pursue-runtime::log::redact` module is used when emitting diagnostic logs containing URLs with query parameters or basic auth fragments.
 
 ---
 
-## 16. Local vs. Tor Browsing Distinction
+## 16. Local vs. Tor browsing distinction
 
 | Property | `RoutingMode::Direct` | `RoutingMode::Tor` |
 | :--- | :--- | :--- |
-| **Transport** | Direct TCP via host network stack | SOCKS5 proxy via Tor daemon |
-| **DNS Resolution** | Local/Host DNS | Remote SOCKS5h DNS via Tor exit |
-| **Hidden Services** | Rejected (`.onion` unreachable) | Permitted (`.onion` supported) |
-| **Failure Behavior** | Fails on host net error | Fails closed on Tor proxy error |
-| **Silent Fallback** | Prohibited | Prohibited |
+| Transport | Direct TCP via host network stack | SOCKS5 proxy via Tor daemon |
+| DNS Resolution | Local/Host DNS | Remote SOCKS5h DNS via Tor exit |
+| Hidden Services | Rejected (`.onion` unreachable) | Permitted (`.onion` supported) |
+| Failure Behavior | Fails on host net error | Fails closed on Tor proxy error |
+| Silent Fallback | Prohibited | Prohibited |
 
 ---
 
-## 17. Failure Behavior
+## 17. Failure behavior
 
 - Tor proxy unreachable $\rightarrow$ Fail closed with `Error::ServiceFailure("Tor proxy unavailable")`.
 - Invalid URL scheme $\rightarrow$ Fail closed with `Error::InvalidInput("forbidden URL scheme")`.
@@ -190,14 +190,14 @@ Input URLs are untrusted user/network inputs. Validation rules:
 
 ---
 
-## 18. Offline & Non-Tor Behavior
+## 18. Offline & non-Tor behavior
 
 - In offline or air-gapped environments, the system functions normally for local case management, inspection of existing evidence, and running mock-based test suites.
 - Attempts to navigate when the network is offline produce clean, typed errors without crashing or corrupting case manifests.
 
 ---
 
-## 19. Security Boundaries
+## 19. Security boundaries
 
 - `#![deny(unsafe_code)]` and `#![warn(missing_docs)]` enforced across `crates/pursue-browser`.
 - Zero shell commands executed for browsing.
@@ -206,13 +206,13 @@ Input URLs are untrusted user/network inputs. Validation rules:
 
 ---
 
-## 20. IPC & Service Architecture
+## 20. IPC & service architecture
 
 `BrowserService` integrates as a managed service within `pursue-runtime`:
-- **`init`**: Validates configuration and storage directories.
-- **`start`**: Prepares session registry and proxy supervisor.
-- **`run`**: Supervises active sessions.
-- **`shutdown`**: Terminates all active sessions cleanly.
+- `init`: Validates configuration and storage directories.
+- `start`: Prepares session registry and proxy supervisor.
+- `run`: Supervises active sessions.
+- `shutdown`: Terminates all active sessions cleanly.
 
 `BrowserHandler` exposes the following IPC methods:
 - `browser.session.create`: `{ "session_id": "...", "case_id": "...", "actor": "...", "mode": "direct"|"tor" }`
@@ -223,16 +223,16 @@ Input URLs are untrusted user/network inputs. Validation rules:
 
 ---
 
-## 21. Testing Strategy
+## 21. Testing strategy
 
-1. **Unit Tests (Offline & Deterministic):**
+1. Unit Tests (Offline & Deterministic):
    - Session creation, status transitions, and ID validation.
    - URL parsing, valid schemes (`http`/`https`), and rejection of forbidden schemes (`file`, `javascript`, `data`).
    - Mock browser engine testing: direct mode success, Tor mode success, Tor unavailable failure, fail-closed assertions.
    - Proof that Tor mode never falls back to direct, and direct mode never falls back to Tor.
    - Artifact creation, provenance generation, and secret header scrubbing.
    - Profile path generation and directory isolation.
-2. **Integration Tests (`tests/browser_integration.rs`):**
+2. Integration Tests (`tests/browser_integration.rs`):
    - End-to-end: Session creation $\rightarrow$ navigation $\rightarrow$ evidence capture $\rightarrow$ case attachment $\rightarrow$ audit log verification.
    - Corrupted evidence detection failing closed on case load.
    - Multi-case isolation: Evidence in Case A cannot be retrieved from Case B.
@@ -241,7 +241,7 @@ Input URLs are untrusted user/network inputs. Validation rules:
 
 ---
 
-## 22. Linux / Windows Development Constraints
+## 22. Linux / Windows development Constraints
 
 - Cross-platform compilation: Builds and passes clippy and tests on both Windows and Linux (`x86_64-unknown-linux-gnu`).
 - Offline CI capability: Unit and integration tests must run without requiring an external internet connection or a running live Tor daemon on host machines. Deterministic mock engines and loopback servers ensure 100% CI pass rate.
@@ -260,16 +260,16 @@ Input URLs are untrusted user/network inputs. Validation rules:
 
 ---
 
-## 24. Explicit Non-Goals (Out of Scope for Phase 1F)
+## 24. Explicit Non-Goals (out of scope for phase 1F)
 
-- **No full GUI browser window:** No WebKit/Chromium graphical rendering engine or browser UI window. Phase 1F is the headless core engine.
-- **No full Tor daemon implementation from scratch:** PURSUE integrates with standard Tor binaries (`tor` daemon / SOCKS5 / control port), not a custom Rust onion router.
-- **No claiming complete anonymity:** Tor routing obscures source IP and enables `.onion` routing, but does NOT guarantee absolute anonymity against sophisticated state adversaries, browser fingerprinting, or investigator error.
-- **No automatic credential syncing:** No cloud passwords, Google accounts, or external telemetry sync.
+- No full GUI browser window: No WebKit/Chromium graphical rendering engine or browser UI window. Phase 1F is the headless core engine.
+- No full Tor daemon implementation from scratch: PURSUE integrates with standard Tor binaries (`tor` daemon / SOCKS5 / control port), not a custom Rust onion router.
+- No claiming complete anonymity: Tor routing obscures source IP and enables `.onion` routing, but does NOT guarantee absolute anonymity against sophisticated state adversaries, browser fingerprinting, or investigator error.
+- No automatic credential syncing: No cloud passwords, Google accounts, or external telemetry sync.
 
 ---
 
-## 25. Definition of Done (Phase 1F)
+## 25. Definition of Done (phase 1F)
 
 1. `crates/pursue-browser` added to the root Cargo workspace with `#![deny(unsafe_code)]` and `#![warn(missing_docs)]`.
 2. Browser session model (`BrowserSessionId`, `BrowserSession`, `RoutingMode`) implemented with validation.

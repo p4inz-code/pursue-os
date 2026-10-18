@@ -1,7 +1,7 @@
-# PURSUE OS — AI Boundaries
+# PURSUE OS: AI boundaries
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative AI boundaries.
+> **Category:** A, Authoritative AI boundaries.
 
 ## Role
 
@@ -29,13 +29,13 @@ AI in PURSUE is an **assistant, not an authority**. The source remains the sourc
 
 ## Product Requirements (locked)
 
-- AI is **optional** and user-controlled: AI mode on/off, ask at startup, explain pros/cons clearly, don't scare users, don't force AI, users can disable AI in settings.
-- **V1: external online AI APIs are NOT supported.** Local model approach preferred; the user may download one of several supported models.
+- AI is optional and user-controlled: AI mode on/off, ask at startup, explain pros/cons clearly, don't scare users, don't force AI, users can disable AI in settings.
+- V1: external online AI APIs are NOT supported. Local model approach preferred; the user may download one of several supported models.
 - Approximately three model categories: fast model, deep-thinking model, coding/technical model.
 - An uncensored/high-assistance option was discussed; it must be handled carefully within security, legal and project boundaries.
-- A **non-AI mode** must exist for users who do not want AI.
+- A non-AI mode must exist for users who do not want AI.
 - Advanced AI configuration comes in later updates.
 
-## Security Relationship
+## Security relationship
 
 Security must not depend on AI behavior (see SECURITY_MODEL). AI operates inside the AI boundary and cannot affect evidence integrity.

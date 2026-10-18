@@ -1,15 +1,15 @@
-# PURSUE OS — Product Vision
+# PURSUE OS: product Vision
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative project decisions.
+> **Category:** A, Authoritative project decisions.
 
-## One Operating System for the Investigation Workflow
+## One operating system for the investigation workflow
 
 PURSUE OS exists to provide a dedicated operating environment for investigators covering OSINT, digital investigations, DFIR, secure research, intelligence gathering, evidence-driven workflows and related investigation tasks.
 
 Instead of assembling a large collection of unrelated tools, PURSUE provides a coherent environment where investigators can research, collect, analyze, connect, preserve, and report information from one system.
 
-## What PURSUE Is
+## What PURSUE is
 
 - Purpose-built for investigation.
 - A complete, coherent investigator workstation.
@@ -18,7 +18,7 @@ Instead of assembling a large collection of unrelated tools, PURSUE provides a c
 - Privacy-oriented and investigator-focused.
 - Professional, approachable, and reliable.
 
-## What PURSUE Is Not
+## What PURSUE is not
 
 - Another Kali Linux clone.
 - A cyberpunk/hacker OS.
@@ -40,9 +40,9 @@ The OS may have Kali-like power and investigation depth, but presentation and UX
 
 The UI must not create a prison-like feeling.
 
-## Flagship Interfaces
+## Flagship interfaces
 
-- **Investigation Terminal** — a purpose-built command-line environment for investigators.
-- **Investigation Browser** — secure, configurable browsing and research workflows with integrated Tor capabilities.
+- Investigation Terminal: a purpose-built command-line environment for investigators.
+- Investigation Browser: secure, configurable browsing and research workflows with integrated Tor capabilities.
 
 These sit alongside the broader investigation platform: case system, evidence handling, provenance, specialized tooling, reporting, and optional local AI assistance.

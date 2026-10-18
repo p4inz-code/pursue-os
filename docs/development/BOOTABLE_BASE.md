@@ -1,23 +1,23 @@
-# PURSUE OS — Minimal Bootable Base Specification (Phase 1B)
+# PURSUE OS: minimal bootable base specification (phase 1B)
 
-> **Category:** B — Implementation documentation (maintained with the code).  
+> **Category:** B, Implementation documentation (maintained with the code).  
 > **Status:** Authoritative specification for Phase 1B; implementation configurations in `build/`.  
 > **Scope:** Phase 1B Minimal Bootable Base: Debian base configuration, systemd init architecture, directory layout, privilege separation, systemd unit definitions, user/group models, network policies, and reproducible image build pipeline.
 
 ---
 
-## 1. Purpose & Identity
+## 1. Purpose & identity
 
 Phase 1B establishes the minimal bootable operating system foundation for PURSUE OS.
 In accordance with `docs/core/DECISION_RECORD.md` §B7 and `docs/core/PURSUE_V1_CONTRACT.md` §1:
-- Base Distribution: **Debian 13 (Trixie) / Debian 12 (Bookworm) minimal base**.
-- Initialization & Supervision: **systemd**.
+- Base Distribution: Debian 13 (Trixie) / Debian 12 (Bookworm) minimal base.
+- Initialization & Supervision: systemd.
 - Security Profile: Hardened, investigator-controlled, privilege-separated.
 - Explicit Non-Goal: Not a Kali clone, not a generic penetration testing distro, not a cyberpunk toy. It is a purpose-built investigator workstation.
 
 ---
 
-## 2. Filesystem Layout & Storage Boundaries
+## 2. Filesystem layout & storage boundaries
 
 PURSUE OS establishes strict filesystem conventions across all packages and services:
 
@@ -35,18 +35,18 @@ PURSUE OS establishes strict filesystem conventions across all packages and serv
 
 ---
 
-## 3. Users, Groups & Privilege Separation
+## 3. Users, groups & privilege separation
 
-### Dedicated Users and Groups
-1. **`pursue` (System Daemon User)**:
+### Dedicated users and groups
+1. `pursue` (System Daemon User):
    - System user (UID < 1000), no login shell (`/usr/sbin/nologin`).
    - Runs `pursue-runtime` background daemons, supervising IPC router and logging sinks.
-2. **`pursue-investigator` (Security Group)**:
+2. `pursue-investigator` (Security Group):
    - Shared group controlling access to the volatile IPC socket (`/run/pursue/ipc.sock`) and case stores.
-3. **`investigator` (Default Interactive User)**:
+3. `investigator` (Default Interactive User):
    - Standard unprivileged user account (UID 1000).
    - Member of `pursue-investigator`, `audio`, `video`, `network`.
-   - **Critical Rule**: The desktop shell, terminal GUI, and browser NEVER run as root. They run as `investigator`.
+   - Critical Rule: The desktop shell, terminal GUI, and browser NEVER run as root. They run as `investigator`.
 
 ---
 
@@ -73,30 +73,30 @@ systemd (PID 1)
 
 ---
 
-## 5. Network Policy & Firewall Baseline
+## 5. Network policy & Firewall baseline
 
-- **Default Firewall**: `nftables` with default-drop ingress policy.
-- **Tor Isolation**:
+- Default Firewall: `nftables` with default-drop ingress policy.
+- Tor Isolation:
   - Outbound traffic in Tor sessions is directed to `127.0.0.1:9050`.
   - DNS leaks are prevented by forcing SOCKS5h remote hostname resolution.
-- **Direct Networking**:
+- Direct Networking:
   - Direct HTTP/HTTPS traffic is allowed for the unprivileged `investigator` user when direct mode is selected.
   - No silent transparent interception: the investigator retains complete visibility over network routing.
 
 ---
 
-## 6. Minimal Base Package Selection
+## 6. Minimal base package selection
 
 Only essential packages are installed in the minimal base image:
-- **Core OS**: `systemd`, `systemd-sysv`, `udev`, `dbus`, `linux-image-amd64`, `grub-efi-amd64-bin`, `grub-pc-bin`.
-- **Networking & Tor**: `iproute2`, `nftables`, `tor`, `ca-certificates`, `wpasupplicant`.
-- **Display & Audio Baseline**: `wayland`, `weston` or `sway` / lightweight display server, `pipewire`.
-- **PURSUE Foundation**: `pursue-runtime`, `pursue-terminal`, `pursue-browser`, `pursue-desktop`.
-- **Exclusions**: Zero hacking game packages, zero duplicate OSINT tools, zero telemetry daemons.
+- Core OS: `systemd`, `systemd-sysv`, `udev`, `dbus`, `linux-image-amd64`, `grub-efi-amd64-bin`, `grub-pc-bin`.
+- Networking & Tor: `iproute2`, `nftables`, `tor`, `ca-certificates`, `wpasupplicant`.
+- Display & Audio Baseline: `wayland`, `weston` or `sway` / lightweight display server, `pipewire`.
+- PURSUE Foundation: `pursue-runtime`, `pursue-terminal`, `pursue-browser`, `pursue-desktop`.
+- Exclusions: Zero hacking game packages, zero duplicate OSINT tools, zero telemetry daemons.
 
 ---
 
-## 7. Reproducible Build Pipeline
+## 7. Reproducible build pipeline
 
 The build infrastructure resides in `build/`:
 - `build/debian/packages.list`: Exact debian package manifest.
@@ -106,7 +106,7 @@ The build infrastructure resides in `build/`:
 - `build/scripts/build-iso.sh`: Hybrid live UEFI/BIOS ISO packaging script via `xorriso` and `mksquashfs`.
 - `build/scripts/validate-build-config.sh`: Automated validator checking syntax and security boundaries.
 
-### Linux Build Host Execution
+### Linux build host execution
 On a dedicated Linux build machine (or WSL with root privileges):
 ```bash
 sudo ./build/scripts/build-base.sh --output /var/tmp/pursue-rootfs

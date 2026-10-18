@@ -1,10 +1,10 @@
-# Security Policy
+# Security policy
 
 PURSUE OS is security-sensitive software intended for investigation and research workflows.
 
 Security issues should be reported responsibly.
 
-## Supported Versions
+## Supported versions
 
 PURSUE does not currently have a stable public release.
 
@@ -12,7 +12,7 @@ During early development, security reports concerning the current development br
 
 Once stable releases exist, this section will define the supported versions.
 
-## Reporting a Vulnerability
+## Reporting a vulnerability
 
 Please do **not** open a public GitHub issue for an undisclosed security vulnerability.
 
@@ -30,7 +30,7 @@ Include:
 - security impact
 - proof of concept where safe
 
-## Do Not Include
+## Do not include
 
 Do not include:
 
@@ -42,7 +42,7 @@ Do not include:
 - personal information
 - unrelated sensitive information
 
-## Responsible Disclosure
+## Responsible disclosure
 
 Please allow reasonable time for investigation and remediation before publicly disclosing an undisclosed vulnerability.
 
@@ -68,7 +68,7 @@ Security reports may concern:
 - command execution
 - OS-level vulnerabilities introduced by PURSUE
 
-## Security Philosophy
+## Security philosophy
 
 PURSUE treats security as a foundational property of the operating system rather than an optional feature.
 

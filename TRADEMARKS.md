@@ -1,4 +1,4 @@
-# PURSUE OS Trademarks
+# PURSUE OS trademarks
 
 PURSUE, PURSUE OS, and associated logos and branding are project
 identifiers associated with P4inz / Atharva Patil.

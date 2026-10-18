@@ -1,7 +1,7 @@
-# PURSUE OS — Repository Structure
+# PURSUE OS: repository structure
 
 > **Source:** PURSUE OS master handoff (authoritative) for the intended tree. Restored 2026-08-09.
-> **Category:** B — implementation documentation (kept synchronized with the actual repository).
+> **Category:** B, implementation documentation (kept synchronized with the actual repository).
 
 ## Intended Structure (from handoff)
 
@@ -31,20 +31,20 @@ pursue-os/
 
 The handoff states some directories are intentionally empty and that no placeholder files should be created merely to make Git track empty folders.
 
-## Current Implementation Status (2026-08-09)
+## Current implementation status (2026-08-09)
 
 - Top-level files and `docs/` are fully tracked (docs restored from the master handoff).
-- **Foundation additions:**
-  - `Cargo.toml` — Rust workspace root.
-  - `rust-toolchain.toml` — pinned stable toolchain.
-  - `crates/pursue-core` — shared primitives.
-  - `crates/pursue-evidence` — evidence integrity foundation (content addressing, audit log, stores).
-  - `Cargo.lock` — locked dependency graph (reproducibility).
-  - `.github/workflows/ci.yml` — CI pipeline (fmt, clippy, tests on ubuntu + windows).
-- **Phase 1C additions (core runtime):**
-  - `crates/pursue-runtime` — core runtime foundation: configuration (TOML), structured logging, service lifecycle, and the IPC/service boundary (see `docs/development/CORE_RUNTIME.md`).
-  - `docs/development/CORE_RUNTIME.md` — Phase 1C implementation guide.
-- **Phase 1D additions (case/evidence foundation):**
-  - `crates/pursue-case` — case foundation: validated `CaseId`, the `Case` model, audited case operations, and the case store layer (`CaseStore` trait, `InMemoryCaseStore`, `FileCaseStore` with per-case isolation and verification on load) (see `docs/development/CASE_FOUNDATION.md`).
-  - `docs/development/CASE_FOUNDATION.md` — Phase 1D implementation guide (Phase 1D complete).
-- The handoff's top-level directories (`os/`, `packaging/`, `plugins/`, `scripts/`, `src/`, `tests/`, `tools/`, `ui/`, `assets/`, `boot/`, `build/`, `config/`) are **created during their respective implementation phases** with real content; empty versions are not preserved in Git.
+- Foundation additions:
+  - `Cargo.toml`: Rust workspace root.
+  - `rust-toolchain.toml`: pinned stable toolchain.
+  - `crates/pursue-core`: shared primitives.
+  - `crates/pursue-evidence`: evidence integrity foundation (content addressing, audit log, stores).
+  - `Cargo.lock`: locked dependency graph (reproducibility).
+  - `.github/workflows/ci.yml`: CI pipeline (fmt, clippy, tests on ubuntu + windows).
+- Phase 1C additions (core runtime):
+  - `crates/pursue-runtime`: core runtime foundation: configuration (TOML), structured logging, service lifecycle, and the IPC/service boundary (see `docs/development/CORE_RUNTIME.md`).
+  - `docs/development/CORE_RUNTIME.md`: Phase 1C implementation guide.
+- Phase 1D additions (case/evidence foundation):
+  - `crates/pursue-case`: case foundation: validated `CaseId`, the `Case` model, audited case operations, and the case store layer (`CaseStore` trait, `InMemoryCaseStore`, `FileCaseStore` with per-case isolation and verification on load) (see `docs/development/CASE_FOUNDATION.md`).
+  - `docs/development/CASE_FOUNDATION.md`: Phase 1D implementation guide (Phase 1D complete).
+- The handoff's top-level directories (`os/`, `packaging/`, `plugins/`, `scripts/`, `src/`, `tests/`, `tools/`, `ui/`, `assets/`, `boot/`, `build/`, `config/`) are created during their respective implementation phases with real content; empty versions are not preserved in Git.

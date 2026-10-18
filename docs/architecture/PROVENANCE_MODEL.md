@@ -1,11 +1,11 @@
-# PURSUE OS — Provenance Model
+# PURSUE OS: provenance model
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative provenance requirements.
+> **Category:** A, Authoritative provenance requirements.
 
-## Locked Requirements
+## Locked requirements
 
-- **Provenance is foundational.** Every piece of evidence must remain traceable to its source and to investigator actions.
+- Provenance is foundational. Every piece of evidence must remain traceable to its source and to investigator actions.
 - Evidence integrity and provenance are foundational properties of the system (see SECURITY.md: "Evidence must remain traceable to its source and investigator actions").
 - Sources: provenance connects information to its source; AI must not silently mutate source information.
 - Case model: provenance is one of the things every case supports.

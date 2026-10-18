@@ -16,13 +16,13 @@ Explain why the change is needed.
 
 Describe the tests or validation performed.
 
-## Security Impact
+## Security impact
 
 Does this change affect security, privileges, networking, evidence handling,
 provenance, cryptography, plugins, AI, or other security-sensitive behavior?
 
 - [ ] No
-- [ ] Yes — explain below
+- [ ] Yes: explain below
 
 ## Checklist
 

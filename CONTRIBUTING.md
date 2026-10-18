@@ -4,7 +4,7 @@ Thank you for your interest in PURSUE OS.
 
 PURSUE is an open-source investigation-focused operating system currently in active development.
 
-## Before Contributing
+## Before contributing
 
 Please understand the project's current status:
 
@@ -32,7 +32,7 @@ Useful contributions may include:
 - plugin development
 - performance improvements
 
-## Pull Requests
+## Pull requests
 
 Before opening a pull request:
 
@@ -46,7 +46,7 @@ Before opening a pull request:
 
 Large architectural changes should be discussed before implementation.
 
-## Security-Sensitive Changes
+## Security-Sensitive changes
 
 Changes involving:
 

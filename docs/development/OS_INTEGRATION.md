@@ -1,4 +1,4 @@
-# PURSUE OS — Phase 5: OS Integration Specification
+# PURSUE OS: phase 5: OS integration specification
 
 > Status: **Implemented**
 > Depends on: Phases 1A–4 (all complete)
@@ -9,9 +9,9 @@
 Move PURSUE OS from "application + OS build infrastructure" to one coherent
 installable/bootable PURSUE OS system.
 
-## Architecture Summary
+## Architecture summary
 
-### Decision A-011: Single Monolithic Binary
+### Decision A-011: single monolithic binary
 
 All domain services (terminal, browser, case, report) run **in-process** within
 the single `pursue-desktop` binary. There are no separate `pursue-runtime`,
@@ -22,7 +22,7 @@ the single `pursue-desktop` binary. There are no separate `pursue-runtime`,
 | Runtime daemon (headless) | `pursue-desktop --headless --config /etc/pursue/config.toml` | `pursue-runtime.service` | `pursue` |
 | Desktop GUI | `pursue-desktop --config /etc/pursue/config.toml` | `pursue-desktop.service` | `pursue-investigator` |
 
-### Service Dependency Graph
+### Service dependency graph
 
 ```
 systemd
@@ -32,16 +32,16 @@ systemd
   └── pursue-desktop.service (pursue-investigator, depends on pursue-runtime)
 ```
 
-### User & Account Model (Decision A-008)
+### User & account model (decision A-008)
 
 | Account | UID | Home | Shell | Purpose |
 |---------|-----|------|-------|---------|
-| `pursue` | dynamic | `/var/lib/pursue` | `/usr/sbin/nologin` | System daemon — backend services |
-| `pursue-investigator` | 1001 | `/home/pursue-investigator` | `/bin/bash` | Interactive investigator — desktop GUI |
+| `pursue` | dynamic | `/var/lib/pursue` | `/usr/sbin/nologin` | System daemon, backend services |
+| `pursue-investigator` | 1001 | `/home/pursue-investigator` | `/bin/bash` | Interactive investigator, desktop GUI |
 
 Group `pursue-investigator` provides IPC socket read/write access.
 
-## Filesystem Layout
+## Filesystem layout
 
 ```
 /etc/pursue/config.toml           — System configuration
@@ -54,7 +54,7 @@ Group `pursue-investigator` provides IPC socket read/write access.
 /var/log/pursue/                   — Structured JSON logs (0750)
 ```
 
-## Configuration Model
+## Configuration model
 
 The runtime configuration (`/etc/pursue/config.toml`) is parsed by
 `pursue_runtime::config::Config`. All path fields are optional and default to
@@ -71,7 +71,7 @@ report_dir = "/var/lib/pursue/reports"
 log_file = "/var/log/pursue/runtime.log"
 ```
 
-## Systemd Hardening
+## Systemd hardening
 
 ### pursue-runtime.service
 
@@ -98,31 +98,31 @@ log_file = "/var/log/pursue/runtime.log"
 | PrivateTmp | true |
 | NoNewPrivileges | true |
 
-## Security Invariants
+## Security invariants
 
-1. **Tor fail-closed (A-006):** Tor unavailable → request fails. Never fallback to direct internet.
-2. **Desktop zero-access (A-007):** Desktop has zero direct filesystem/process/database access. All interaction through IPC.
-3. **No external AI (A-009):** No external AI API dependency in V1.
-4. **Offline-first (A-010):** Must work without internet connectivity.
-5. **Evidence immutability:** Content-addressed SHA-256. No silent mutation.
-6. **Audit completeness:** Hash-chained audit log for all state changes.
-7. **No secrets in logs:** Bearer tokens, passwords, cookies are redacted.
+1. Tor fail-closed (A-006): Tor unavailable → request fails. Never fallback to direct internet.
+2. Desktop zero-access (A-007): Desktop has zero direct filesystem/process/database access. All interaction through IPC.
+3. No external AI (A-009): No external AI API dependency in V1.
+4. Offline-first (A-010): Must work without internet connectivity.
+5. Evidence immutability: Content-addressed SHA-256. No silent mutation.
+6. Audit completeness: Hash-chained audit log for all state changes.
+7. No secrets in logs: Bearer tokens, passwords, cookies are redacted.
 
-## Changes from Phase 1B
+## Changes from phase 1B
 
 | Component | Before (Phase 1B) | After (Phase 5) |
 |-----------|-------------------|-----------------|
 | `pursue-runtime.service` ExecStart | `/usr/lib/pursue/bin/pursue-runtime` (non-existent) | `/usr/lib/pursue/bin/pursue-desktop --headless` |
-| `pursue-terminal.service` | Existed (referenced non-existent binary) | **Removed** (in-process per A-011) |
-| `pursue-browser.service` | Existed (referenced non-existent binary) | **Removed** (in-process per A-011) |
-| `pursue-desktop.service` | Did not exist | **Created** |
+| `pursue-terminal.service` | Existed (referenced non-existent binary) | Removed (in-process per A-011) |
+| `pursue-browser.service` | Existed (referenced non-existent binary) | Removed (in-process per A-011) |
+| `pursue-desktop.service` | Did not exist | Created |
 | `packages.list` compositor | `weston` | `sway` (Decision A-002) |
 | `sysusers.d` | `pursue-investigator` as group only | Added as user (UID 1001) |
 | `tmpfiles.d` | Missing reports directory | Added `/var/lib/pursue/reports` |
 | `Config` struct | 4 fields | 8 fields + 5 resolver methods |
 | `main.rs` | Hardcoded temp dirs | Config-driven with `--config` flag |
 
-## Test Coverage
+## Test coverage
 
 Phase 5 adds 9 integration tests:
 

@@ -1,14 +1,14 @@
-# PURSUE OS — Graph Model
+# PURSUE OS: graph model
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A/B — graph *requirements* are handoff-locked; graph *implementation* is implementation-defined.
+> **Category:** A/B, graph *requirements* are handoff-locked; graph *implementation* is implementation-defined.
 
-## Locked Requirements
+## Locked requirements
 
-- Cases support **relationships** between entities — the foundation of investigation graphs.
-- **Investigation graphs** are a locked core investigation area.
+- Cases support relationships between entities. The foundation of investigation graphs.
+- Investigation graphs are a locked core investigation area.
 - Graphs connect evidence, sources, people, entities, and findings into a coherent picture.
-- The graph UI is **deferred** to a later phase (not V1 foundation).
+- The graph UI is deferred to a later phase (not V1 foundation).
 
 ## Principles
 

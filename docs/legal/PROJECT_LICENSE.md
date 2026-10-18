@@ -1,7 +1,7 @@
-# PURSUE OS — Project License (Apache-2.0)
+# PURSUE OS: project license (Apache-2.0)
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Locked license decision.
+> **Category:** A, Locked license decision.
 
 ## Decision
 
@@ -19,6 +19,6 @@ PURSUE OS is released under the **Apache License 2.0**.
 
 ## Scope
 
-- Apache-2.0 applies to **PURSUE's own code**.
+- Apache-2.0 applies to PURSUE's own code.
 - Third-party software distributed with PURSUE may have separate licenses; keep third-party licensing separate from PURSUE's Apache-2.0.
-- LICENSE contains the full Apache-2.0 text — do not shorten it.
+- LICENSE contains the full Apache-2.0 text, do not shorten it.

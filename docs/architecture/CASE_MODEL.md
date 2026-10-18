@@ -1,21 +1,21 @@
-# PURSUE OS — Case Model
+# PURSUE OS: case model
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative case requirements.
+> **Category:** A, Authoritative case requirements.
 
-## Locked Requirements
+## Locked requirements
 
 PURSUE must have strong case management. A case supports:
 
-- **Evidence** — collected artifacts; evidence is always the source of truth.
-- **Sources** — origins of information, traceable via provenance.
-- **Provenance** — recorded origin and handling history of everything in the case.
-- **Investigator notes** — investigator-controlled metadata.
-- **Relationships** — connections between entities.
-- **Timelines** — chronological organization of investigation events.
-- **Findings** — conclusions anchored to evidence.
-- **Reports** — professional outputs preserving provenance and evidence integrity.
-- **Exports** — secure, investigation-friendly output forms.
+- Evidence: collected artifacts; evidence is always the source of truth.
+- Sources: origins of information, traceable via provenance.
+- Provenance: recorded origin and handling history of everything in the case.
+- Investigator notes: investigator-controlled metadata.
+- Relationships: connections between entities.
+- Timelines: chronological organization of investigation events.
+- Findings: conclusions anchored to evidence.
+- Reports: professional outputs preserving provenance and evidence integrity.
+- Exports: secure, investigation-friendly output forms.
 
 ## Principles
 

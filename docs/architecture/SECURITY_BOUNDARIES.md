@@ -1,23 +1,23 @@
-# PURSUE OS — Security Boundaries
+# PURSUE OS: security boundaries
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative security boundaries.
+> **Category:** A, Authoritative security boundaries.
 
 > **Note:** The master handoff references this document as `docs/security/SECURITY_BOUNDARIES.md`, but the repository structure places it at `docs/architecture/SECURITY_BOUNDARIES.md` (matching the committed tree). This location is authoritative; no duplicate is created.
 
-## Locked Security Architecture Areas
+## Locked security architecture areas
 
-- **Privilege separation** — least privilege between components.
-- **Secure storage** — protected storage for evidence, cases, and secrets.
-- **Evidence integrity** — evidence is the immutable source of truth; tampering must be detectable.
-- **Network boundaries** — controlled and understandable network state.
-- **Tor isolation** — Tor workflows isolated from the rest of the system.
-- **Plugin isolation** — plugins must not be able to compromise the platform or alter evidence.
-- **AI boundaries** — AI is assistant only; never alters evidence or becomes the source of truth.
-- **Update security** — secure, integrity-checked updates.
-- **Package integrity** — packages verified before use.
-- **Case isolation** — cases kept separate from each other.
-- **Secure defaults** — "S-class" by default, with further configuration available.
+- Privilege separation: least privilege between components.
+- Secure storage: protected storage for evidence, cases, and secrets.
+- Evidence integrity: evidence is the immutable source of truth; tampering must be detectable.
+- Network boundaries: controlled and understandable network state.
+- Tor isolation: Tor workflows isolated from the rest of the system.
+- Plugin isolation: plugins must not be able to compromise the platform or alter evidence.
+- AI boundaries: AI is assistant only; never alters evidence or becomes the source of truth.
+- Update security: secure, integrity-checked updates.
+- Package integrity: packages verified before use.
+- Case isolation: cases kept separate from each other.
+- Secure defaults: "S-class" by default, with further configuration available.
 
 ## Constraints
 

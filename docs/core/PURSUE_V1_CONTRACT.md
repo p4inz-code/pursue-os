@@ -1,36 +1,36 @@
-# PURSUE V1 — Contract
+# PURSUE V1: contract
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative project decisions.
+> **Category:** A, Authoritative project decisions.
 
 This document is the contract for what PURSUE V1 commits to. It is derived directly from the master handoff; details the handoff does not establish are explicitly left implementation-defined.
 
-## 1. Identity Contract
+## 1. Identity contract
 
 - V1 is an investigation-focused Linux operating system: *one operating system for the investigation workflow*.
 - V1 is not a Kali clone, a cyberpunk/hacker OS, a generic Linux distribution, or a random tool collection.
 - Presentation is clean, modern, professional, configurable, and not intimidating. The UI must not feel prison-like.
 
-## 2. Flagship Contract
+## 2. Flagship contract
 
-- **Investigation Terminal** is a V1 flagship and mandatory for core investigation workflows (web scraping, information gathering, command-based investigation, OSINT tools, frameworks, automation under investigator control).
-- **Investigation Browser** is a V1 flagship: secure, configurable research browsing with integrated Tor capabilities.
+- Investigation Terminal is a V1 flagship and mandatory for core investigation workflows (web scraping, information gathering, command-based investigation, OSINT tools, frameworks, automation under investigator control).
+- Investigation Browser is a V1 flagship: secure, configurable research browsing with integrated Tor capabilities.
 - Terminal and browser together form the major investigation interface layer.
 
-## 3. Tor Contract
+## 3. Tor contract
 
-- Tor is deeply integrated, configurable, understandable, secure, and user-controlled — not just another installed application.
+- Tor is deeply integrated, configurable, understandable, secure, and user-controlled. Not just another installed application.
 - Tor is not forced for every web request; network state must remain understandable.
 - PURSUE V1 must not claim Tor provides complete anonymity.
 
-## 4. Browser Contract
+## 4. Browser contract
 
 - Tor-based browsing for appropriate investigation workflows.
 - Brave-based or normal browser workflow where Tor/.onion is not required.
 - Multiple search engines: DuckDuckGo and Brave Search expected; onion search capability expected; Ahmia and Yahoo discussed as options.
 - Browser remains investigator-controlled.
 
-## 5. Terminal Contract
+## 5. Terminal contract
 
 - Investigator-focused, command-based, powerful, configurable, strong UX.
 - Syntax highlighting and error highlighting.
@@ -38,44 +38,44 @@ This document is the contract for what PURSUE V1 commits to. It is derived direc
 - Supports future expansion; advanced customization later.
 - Default shell is polished; additional shells supported where technically useful on Linux. V1 must not blindly recreate Windows shells.
 
-## 6. Case + Evidence Contract
+## 6. Case + evidence contract
 
 - Strong case management: evidence, sources, provenance, investigator notes, relationships, timelines, findings, reports, exports.
-- **Evidence is always the source of truth.**
+- Evidence is always the source of truth.
 - AI must never silently alter evidence.
 - Evidence integrity and provenance are foundational.
 
-## 7. Reporting Contract
+## 7. Reporting contract
 
 - Professional reporting: multiple formats, export options (ZIP, JSON), protected/obfuscated code where appropriate, secure export.
 - Reporting preserves provenance and evidence integrity.
 - Not overengineered for V1.
 
-## 8. AI Contract
+## 8. AI contract
 
 - AI is optional and user-controlled (mode on/off, ask at startup, explainable, disableable).
-- **External online AI APIs are NOT supported in V1.**
+- External online AI APIs are NOT supported in V1.
 - Local model approach preferred; user may download one of several supported models.
 - Approximately three model categories: fast, deep-thinking, coding/technical.
 - AI is assistant only: never manipulates evidence, never silently modifies sources, never fabricates facts, never becomes the source of truth, never automates investigator judgment without consent.
 - A non-AI mode exists.
 
-## 9. Plugin Contract
+## 9. Plugin contract
 
-- V1 ships a strong plugin foundation (user-extensible, roughly 5–7 useful tools per use case initially).
+- V1 ships a strong plugin foundation (user-extensible, roughly 5-7 useful tools per use case initially).
 - Foundation designed so V2 (stronger plugin system, official modules, downloadable advanced modules, public plugins) does not require rebuilding.
 - Plugin isolation is a security requirement.
 
-## 10. Security Contract
+## 10. Security contract
 
 - Strong default security ("S-class" by default), further configuration available.
 - Optional user additions: VPN, VM, additional isolation, advanced network configurations.
 - No claim that the OS makes a user invulnerable.
 - Security architecture areas (from handoff): privilege separation, secure storage, evidence integrity, network boundaries, Tor isolation, plugin isolation, AI boundaries, update security, package integrity, case isolation, secure defaults.
 
-## 11. Tool Contract
+## 11. Tool contract
 
-- Curated defaults: approximately 5–7 useful tools per use case initially; users can install more.
+- Curated defaults: approximately 5-7 useful tools per use case initially; users can install more.
 - Integrate existing tools where appropriate; official tools where necessary; support major frameworks; avoid reinventing mature tools.
 - Hardware-specific limitations remain the user's responsibility.
 

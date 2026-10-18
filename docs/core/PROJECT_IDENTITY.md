@@ -1,14 +1,14 @@
-# PURSUE OS — Project Identity
+# PURSUE OS: project identity
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative project decisions.
+> **Category:** A, Authoritative project decisions.
 
-## Names & Brand
+## Names & brand
 
-- **Product name:** PURSUE OS (locked — do not rename).
-- **Creator / brand:** P4inz.
-- **Creator:** P4inz / Atharva Patil.
-- **GitHub:** https://github.com/p4inz-code/pursue-os (public repository).
+- Product name: PURSUE OS (locked, do not rename).
+- Creator / brand: P4inz.
+- Creator: P4inz / Atharva Patil.
+- GitHub: https://github.com/p4inz-code/pursue-os (public repository).
 
 ## Purpose
 
@@ -26,7 +26,7 @@ Powerful, secure, customizable, professional, approachable, investigator-focused
 
 Clean, modern, professional, configurable, not intimidating. Not cyberpunk, not a green-terminal aesthetic, not excessive hacker imagery. The UI must not create a prison-like feeling.
 
-## Licensing & Branding Boundary
+## Licensing & branding boundary
 
 - Apache License 2.0 applies to PURSUE's own code only.
 - Third-party software distributed with PURSUE may carry separate licenses.

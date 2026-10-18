@@ -1,13 +1,13 @@
-# PURSUE OS — Security Model
+# PURSUE OS: security model
 
 > **Source:** PURSUE OS master handoff (authoritative). Restored 2026-08-09.
-> **Category:** A — Authoritative security requirements.
+> **Category:** A, Authoritative security requirements.
 
-## Locked Requirements
+## Locked requirements
 
-- **Security is a first-class concern.** PURSUE provides strong default security — "S-class" by default — with further configuration available.
+- Security is a first-class concern. PURSUE provides strong default security, "S-class" by default, with further configuration available.
 - Users may optionally add: VPN, VM, additional isolation, advanced network configurations.
-- PURSUE must **not pretend the OS makes a user invulnerable**.
+- PURSUE must not pretend the OS makes a user invulnerable.
 - Security must not depend on AI behavior.
 - Evidence must remain traceable to its source and to investigator actions.
 
@@ -25,7 +25,7 @@
 - Case isolation
 - Secure defaults
 
-## Security Posture
+## Security posture
 
 - Strong defaults with understandable, user-controlled configuration.
 - Honest communication of what protections exist and what they do not guarantee (especially Tor: no complete-anonymity claim).

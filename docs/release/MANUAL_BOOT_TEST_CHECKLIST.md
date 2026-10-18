@@ -1,4 +1,4 @@
-# PURSUE OS — V1 Beta Manual Boot Test Checklist
+# PURSUE OS: V1 beta manual boot test checklist
 
 > **Purpose:** Step-by-step validation checklist for the owner's first manual boot of the PURSUE OS V1 Beta ISO on real or virtual hardware.
 > **ISO Path:** `target/pursue-os-v1-amd64.iso` (Volume Label: `PURSUE_OS_V1`)
@@ -10,104 +10,104 @@
 
 ---
 
-## Pre-Boot Requirements
+## Pre-Boot requirements
 
 - A USB drive (≥ 1 GB) or virtual machine capable of booting ISO images
 - For USB: Flash with `dd`, Rufus (DD mode), or Ventoy
 - For VM: Attach ISO as boot media, allocate ≥ 2 GB RAM, 2+ CPU cores
-- **NVIDIA RTX Note:** On systems with very new NVIDIA GPUs (such as RTX 5060 / 5070 Ti), if the default boot entry fails modesetting, select `"PURSUE OS — Safe Graphics (NVIDIA / Software Fallback)"` from the GRUB menu.
+- NVIDIA RTX Note: On systems with very new NVIDIA GPUs (such as RTX 5060 / 5070 Ti), if the default boot entry fails modesetting, select `"PURSUE OS — Safe Graphics (NVIDIA / Software Fallback)"` from the GRUB menu.
 
 ---
 
-## Boot Test Procedure
+## Boot test procedure
 
-### Phase 1: Boot & Kernel
+### Phase 1: boot & kernel
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 1 | Insert USB / attach ISO and power on | GRUB boot menu appears with normal and Safe Graphics options | |
 | 2 | Wait for automatic boot (5 second timeout) or press Enter | Kernel begins loading | |
 | 3 | Observe kernel messages on screen | `Linux pursue-os 6.12.x` kernel boots without panic | |
 
 
-### Phase 2: Automatic Login & Desktop
+### Phase 2: automatic login & desktop
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 4 | Wait for automatic login | `pursue-investigator` is logged in automatically (no password prompt) | |
 | 5 | Sway compositor starts | Desktop environment appears (not a bare shell prompt) | |
 | 6 | PURSUE Desktop application launches | "PURSUE OS — Forensic Investigation Shell" window appears | |
 | 7 | Dashboard tab is visible | Dashboard renders with system information and IPC status | |
-| 8 | IPC status indicator | Shows "ONLINE" (green) — the backend daemon is running | |
+| 8 | IPC status indicator | Shows "ONLINE" (green), the backend daemon is running | |
 
 > **If you see a shell prompt instead of a desktop:** Sway may not have started. Type `sway` and press Enter. If Sway starts and PURSUE Desktop appears, the session startup is functional but the profile.d trigger may not have executed. Report this.
 
-### Phase 3: Case Management
+### Phase 3: case management
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 9 | Click "Cases" tab | Case management view appears | |
 | 10 | Create a new case (enter an ID like `test-case-01` and a title) | Case is created successfully, status message confirms | |
 | 11 | Case appears in the case list | Case ID and title are visible | |
 | 12 | Click on the case to open it | Case details load (title, status, notes, evidence list) | |
 
-### Phase 4: Terminal & Command Execution
+### Phase 4: terminal & command execution
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 13 | Click "Terminal" tab | Terminal console view appears | |
 | 14 | Start a new terminal session | Session is created (linked to the active case) | |
 | 15 | Execute a safe command (e.g., `uname -a` or `hostname`) | Command output appears showing Linux kernel information | |
 | 16 | Output is displayed cleanly | No garbled text, no error messages | |
 
-### Phase 5: Evidence Capture
+### Phase 5: evidence capture
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 17 | Capture evidence from the terminal output | Evidence is captured with a SHA-256 content address | |
 | 18 | Click "Evidence" tab | Evidence list shows the captured artifact | |
 
-### Phase 6: Audit Trail
+### Phase 6: audit Trail
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 19 | Click "Audit Trail" tab | Audit log shows hash-chained events (case creation, evidence capture) | |
 | 20 | Verify audit chain integrity | Chain verification shows "verified: true" | |
 
-### Phase 7: Browser & Network
+### Phase 7: browser & network
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 21 | Click "Browser & Tor" tab | Browser console view appears | |
 | 22 | Observe Tor/network status | Tor service status is displayed | |
 | 23 | Verify `.onion` URLs are rejected in Direct mode | Navigation to `.onion` addresses fails with security boundary message | |
 
-### Phase 8: Reports
+### Phase 8: reports
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 24 | Click "Reports" tab | Report generation view appears | |
 | 25 | Generate a report for the active case | Report generates successfully with SHA-256 hash | |
 | 26 | Export report to disk | Report file is written, path is displayed | |
 | 27 | Verify the exported report | Verification confirms cryptographic seal is intact | |
 
-### Phase 9: Case Closure
+### Phase 9: case Closure
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 28 | Return to "Cases" tab | Case list is visible | |
 | 29 | Close the test case | Case status changes to "closed" | |
 
-### Phase 10: System Lifecycle
+### Phase 10: system lifecycle
 
-| # | Step | Expected Result | ✅/❌ |
+| # | Step | Expected Result | /|
 |---|------|----------------|-------|
 | 30 | Shutdown the system (via terminal: `sudo poweroff`) | System shuts down cleanly without errors | |
 | 31 | Reboot the system (via terminal: `sudo reboot`) | System reboots and returns to the desktop | |
 
 ---
 
-## Expected First-Boot Result
+## Expected First-Boot result
 
 **On a successful boot, you should see:**
 
@@ -134,7 +134,7 @@
 
 **What is NOT a failure:**
 
-- `systemctl is-system-running` shows "degraded" — some optional system services may not start in a live ISO environment (this is expected and does not affect PURSUE functionality)
+- `systemctl is-system-running` shows "degraded": some optional system services may not start in a live ISO environment (this is expected and does not affect PURSUE functionality)
 - Minor cosmetic differences in font rendering
 - Sway showing informational messages in the background
 - Network-dependent services being unavailable (e.g., if no network cable is connected)
@@ -145,14 +145,14 @@
 
 After completing the test, note:
 
-1. Which steps passed and which failed (use the ✅/❌ column)
+1. Which steps passed and which failed (use the /column)
 2. Any error messages shown on screen
 3. Any unexpected behavior not covered by this checklist
 4. The hardware/VM configuration used for testing
 
 ---
 
-## Technical Reference
+## Technical reference
 
 | Component | Path |
 |-----------|------|

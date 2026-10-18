@@ -1,20 +1,20 @@
-# PURSUE OS — Design Language
+# PURSUE OS: design language
 
 > **Source:** PURSUE OS master handoff (authoritative) for direction; specifics implementation-defined. Restored 2026-08-09.
 > **Category:** A (direction) / B (specifics).
 
-## Locked Direction
+## Locked direction
 
 PURSUE may have Kali-like power and investigation depth, but presentation and UX follow the broader PURSUE philosophy:
 
-- **clean**
-- **modern**
-- **professional**
-- **configurable**
-- **not intimidating**
-- **not cyberpunk**
-- **not a green-terminal aesthetic**
-- **not excessive hacker imagery**
+- clean
+- modern
+- professional
+- configurable
+- not intimidating
+- not cyberpunk
+- not a green-terminal aesthetic
+- not excessive hacker imagery
 
 The UI must not create a **prison-like feeling**.
 
