@@ -168,7 +168,7 @@ Input URLs are untrusted user/network inputs. Validation rules:
 
 ---
 
-## 16. Local vs. Tor browsing distinction
+## 16. Local vs. Tor browsing Distinction
 
 | Property | `RoutingMode::Direct` | `RoutingMode::Tor` |
 | :--- | :--- | :--- |

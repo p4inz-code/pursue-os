@@ -6,9 +6,9 @@
 
 ---
 
-**PURSUE OS** is an investigation-focused Linux operating system designed around evidence integrity, cryptographic provenance, privacy, local-first operation, and an integrated investigator workflow.
+**PURSUE OS** is a Linux operating system for investigations. It is designed around evidence integrity, cryptographic provenance, privacy, local-first operation and a single investigator workflow.
 
-It is built for open-source intelligence (OSINT), digital forensics and incident response (DFIR), investigative research, intelligence analysis, and evidence-driven workflows.
+It targets open-source intelligence (OSINT), digital forensics and incident response (DFIR), investigative research, intelligence analysis and evidence-driven work.
 
 Built and maintained by **P4inz**.
 
@@ -20,7 +20,7 @@ PURSUE OS is an integrated forensic investigation environment designed around a 
 
 > **One coherent operating system for the complete investigation lifecycle.**
 
-Rather than packaging an uncurated collection of independent third-party utilities, PURSUE OS integrates the primary stages of an investigation into a unified, cryptographically verified desktop shell:
+Instead of bundling a loose collection of third-party tools, PURSUE OS builds the main stages of an investigation into one desktop shell with cryptographic verification:
 
 - Case Management: Isolated case containers with audited operations and cryptographic manifests.
 - Investigation Terminal: Purpose-built console environment with bounded execution, structured stream capture, and automatic case provenance.
@@ -62,7 +62,7 @@ Rather than packaging an uncurated collection of independent third-party utiliti
 
 ## Validation & verification summary
 
-The PURSUE OS codebase has undergone rigorous automated testing, security audit simulation, and live virtual machine cold-boot verification:
+The codebase has been through automated testing, a simulated security audit and live cold-boot checks in a virtual machine:
 
 | Validation Gate | Verified Status | Evidence |
 |---|---|---|

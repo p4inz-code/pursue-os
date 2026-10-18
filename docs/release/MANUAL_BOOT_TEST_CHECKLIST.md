@@ -145,7 +145,7 @@
 
 After completing the test, note:
 
-1. Which steps passed and which failed (use the /column)
+1. ✅ Which steps passed and which failed (use the /❌ column)
 2. Any error messages shown on screen
 3. Any unexpected behavior not covered by this checklist
 4. The hardware/VM configuration used for testing
