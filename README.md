@@ -137,13 +137,13 @@ The 31-step checklist validates the end-to-end user experience on real hardware:
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │             PURSUE OS Desktop Shell (egui / Sway)           │
-│     (Unprivileged UI — runs as pursue-investigator UID 1001)│
+│     (Unprivileged UI, runs as pursue-investigator UID 1001)│
 └───────────────────────────────┬─────────────────────────────┘
                                 │ Local IPC (AF_UNIX socket)
                                 │ /run/pursue/ipc.sock (0770)
 ┌───────────────────────────────▼─────────────────────────────┐
 │          PURSUE Core Runtime Daemon (pursue-desktop)        │
-│          (System Service — runs as pursue UID 990)          │
+│          (System Service, runs as pursue UID 990)          │
 ├────────────────┬──────────────┬──────────────┬──────────────┤
 │  Case Service  │ Report Serv  │ Terminal Svc │ Browser Svc  │
 ├────────────────┴──────────────┴──────────────┴──────────────┤
